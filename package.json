@@ -1,0 +1,19 @@
+{
+  "name": "truffle-ai-backend",
+  "version": "1.0.0",
+  "description": "The backend of truffle-ai using APIs and web-scraping to find promising early-stage devtools companies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jst-seminar-rostlab-tum/truffle-ai-backend.git"
+  },
+  "author": "JST seminar at TUM",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jst-seminar-rostlab-tum/truffle-ai-backend/issues"
+  },
+  "homepage": "https://github.com/jst-seminar-rostlab-tum/truffle-ai-backend#readme"
+}
