@@ -5,7 +5,7 @@ const _resolvers = {
     books: () => controller.getBooks(),
   },
   Mutation: {
-    addBook: (title:string, author:string) => controller.addBook(title, author),
+    addBook: (title: string, author: string) => controller.addBook(title, author),
   },
 };
 

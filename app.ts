@@ -19,34 +19,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', routes);
 
 // catch 404 and forward to error handler
-app.use((req: Request, res: Response, next: Function) =>{
+app.use((req: Request, res: Response, next: Function) => {
   next(createError(404));
 });
 
 // error handler
-app.use((err: Error | undefined, req: Request, res: Response, next: NextFunction) =>{
+app.use((err: Error | undefined, req: Request, res: Response, next: NextFunction) => {
   // set locals, only providing error in development
-  if(err){
+  if (err) {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
-  
+
     // render the error page
     res.status(500);
     res.render('error');
-  }else{
+  } else {
     next();
   }
- 
+
 });
 
 mongoose
-    .connect(
-        "mongodb://localhost:27017" 
-    )
-    .then((res:any)=>{
-      if(res){
-        app.listen(8080, () => {
-          console.log('Server running on http://localhost:8080');
-        });
-      }
-    });
+  .connect(
+    "mongodb://localhost:27017"
+  )
+  .then((res: any) => {
+    if (res) {
+      app.listen(8080, () => {
+        console.log('Server running on http://localhost:8080');
+      });
+    }
+  });

@@ -1,8 +1,5 @@
 import { buildSchema } from "graphql";
 
-const { gql } = require('graphql-tag');
-const { bookQueries, authorQueries } = require('./queries');
-
 // GraphQL schema
 var schema = buildSchema(`
 type Book {
