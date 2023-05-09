@@ -16,3 +16,5 @@ npm run dev
 `npm run prepare` installs the precommit hook, that will run Eslint and Prettier before you commit anything.
 
 `npm run dev` check [Graphiql](http://localhost:3000/graphiql) with your browser to test the GraphQL server.
+
+`npm install --save @supabase/supabase-js` installs necessary packages for Supabase database

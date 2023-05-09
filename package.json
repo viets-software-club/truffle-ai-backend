@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/jst-seminar-rostlab-tum/truffle-ai-backend#readme",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "fastify": "^4.17.0",
     "graphql": "^16.6.0",
     "husky": "^8.0.3",
