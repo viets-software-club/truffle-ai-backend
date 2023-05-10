@@ -8,6 +8,12 @@ type SocialMediaPresence = {
   link: string
 }
 
+type SocialMediaTopPost = {
+  platform: string
+  link: string
+  title: string
+}
+
 const repositories = [
   {
     id: '1',
@@ -29,11 +35,14 @@ const resolvers = {
     gitRepository: (obj: unknown, { id }: GitRepositoryQueryArgs) =>
       repositories.find((r) => r.id === id) ?? [],
     gitRepositories: () => repositories,
-    projects: () => [sampleProject]
+    projects: () => {
+      console.log('hallo')
+      return [sampleProject]
+    }
   },
   SocialMediaPresence: {
     // not working currently. I don't know why
-    __resolveType(socialMediaPresence: SocialMediaPresence) {
+    resolveType(socialMediaPresence: SocialMediaPresence) {
       console.log(socialMediaPresence.platform)
       switch (socialMediaPresence.platform) {
         case 'Twitter':
@@ -46,6 +55,20 @@ const resolvers = {
           return 'DiscordChannel'
         default:
           return null // fallback to null if the object doesn't match any known types
+      }
+    }
+  },
+  SocialMediaTopPost: {
+    resolveType(socialMediaTopPost: SocialMediaTopPost) {
+      switch (socialMediaTopPost.platform) {
+        case 'Hacker News':
+          return 'HackernewsTopPost'
+        case 'Twitter':
+          return 'TwitterTopPost'
+        case 'Product Hunt':
+          return 'ProductHuntTopPost'
+        default:
+          return null
       }
     }
   }
@@ -115,22 +138,26 @@ const sampleProject = {
     {
       platform: 'Twitter',
       accountName: 'Next.js',
-      link: 'https://twitter.com/vercel'
+      link: 'https://twitter.com/vercel',
+      followerCount: 245000
     },
     {
       platform: 'LinkedIn',
       accountName: 'Next.js',
-      link: 'https://www.linkedin.com/company/zeitco/'
+      link: 'https://www.linkedin.com/company/zeitco/',
+      followerCount: 19000
     },
     {
       platform: 'Slack',
       accountName: '#next-js',
-      link: 'https://vercel.com/chat'
+      link: 'https://vercel.com/chat',
+      memberCount: 45000
     },
     {
       platform: 'Discord',
       accountName: 'Next.js',
-      link: 'https://discord.gg/nextjs'
+      link: 'https://discord.gg/nextjs',
+      memberCount: 95000
     }
   ],
   socialMediaTopPosts: [
