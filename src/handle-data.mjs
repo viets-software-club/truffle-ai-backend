@@ -42,6 +42,7 @@ import supabase from "./config/supabaseClient.mjs";
       .from('projects')
       .update({ bookmarks: 5 })
       .eq('project_name', 'Truffle-AI-backend')
+    return { bookmarks: 5 }
   }  
 
   
