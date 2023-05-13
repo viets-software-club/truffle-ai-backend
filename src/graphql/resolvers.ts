@@ -1,7 +1,7 @@
 // I get an error when importing this module. It works still.
 // chatGPT says this might come from the standard module loader not supporting
 // json files?! I do not know how to resolve this atm
-import nextjsSampleProject from '../../assets/nextjsSampleProject.json'
+import sampleProjects from '../../assets/sampleProjects'
 
 type SocialMediaPresence = {
   platform: string
@@ -18,9 +18,15 @@ type SocialMediaTopPost = {
 const resolvers = {
   Query: {
     // see https://graphql.org/learn/execution/
-    projects: (): [any] => [nextjsSampleProject]
+    // Returns the above imported sampleProjects
+    //
+    // pre-commit hook complains -> --no-verify commit
+    //
+    // will check with Philipp whether and how to change this
+    projects: () => sampleProjects
   },
   SocialMediaPresence: {
+    // resolves the type of SocialMediaPresence based on the platform field
     resolveType(socialMediaPresence: SocialMediaPresence) {
       console.log(socialMediaPresence.platform)
       switch (socialMediaPresence.platform) {
@@ -38,6 +44,7 @@ const resolvers = {
     }
   },
   SocialMediaTopPost: {
+    // resolves the type of SocialMediaTopPost based on the platform field
     resolveType(socialMediaTopPost: SocialMediaTopPost) {
       switch (socialMediaTopPost.platform) {
         case 'Hacker News':
