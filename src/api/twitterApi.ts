@@ -1,6 +1,3 @@
-// see https://developer.twitter.com/en/docs/twitter-api/users/lookup/api-reference/get-users-by-username-username#tab1
-// https://github.com/twitterdev/twitter-api-typescript-sdk (library)
-// npm install twitter-api-sdk
 import { Client } from 'twitter-api-sdk'
 
 interface TwitterUser {
@@ -18,6 +15,9 @@ interface TwitterPost {
 const twitterClient = new Client('auth-token')
 
 class TwitterApiService {
+  public static readonly SORT_BY_RETWEETS = 'retweets'
+  public static readonly SORT_BY_LIKES = 'likes'
+
   /**
    * Fetches the Twitter user by his handle
    * @param twitterHandle
@@ -53,12 +53,18 @@ class TwitterApiService {
    *
    * source: https://developer.twitter.com/en/docs/twitter-api/data-dictionary/using-fields-and-expansions
    *
-   * pagination and the max_results documentation can be found here: https://developer.twitter.com/en/docs/twitter-api/pagination
+   * pagination and the max_results documentation can be found here:
+   * https://developer.twitter.com/en/docs/twitter-api/pagination
    *
    * @param twitterHandle
+   * @param sortingCriterion: specifies whether to sort the tweets by likes or by retweets
    * @returns an array with the 10 most popular TwitterPost including their id, count of retweets and like count
    */
-  public async getMostPopularTweets(twitterHandle: string): Promise<TwitterPost[]> {
+
+  public async getMostPopularTweetsByUser(
+    twitterHandle: string,
+    sortingCriterion: string
+  ): Promise<TwitterPost[]> {
     const twitterUser = await this.getTwitterUserByHandle(twitterHandle)
 
     // Returns a list of Tweets with their public_metrics authored by the provided User ID and cuts it at 100
@@ -73,18 +79,18 @@ class TwitterApiService {
 
     const tweets = tweetsResponse.data
 
-    // Sorts the tweets based on their likes (could also be done with retweets?), takes the first (most popular) 10 and returns them in an array
+    // Sorts the tweets based on their retweets or likes specified by the sorting criterion,
+    // takes the first (most popular) 10 and returns them in an array
+
     return tweets
       .sort((a, b) => {
-        if (
-          !a.public_metrics ||
-          !a.public_metrics.like_count ||
-          !b.public_metrics ||
-          !b.public_metrics.like_count
-        ) {
+        if (sortingCriterion === TwitterApiService.SORT_BY_LIKES) {
+          return (b.public_metrics?.like_count ?? 0) - (a.public_metrics?.like_count ?? 0)
+        } else if (sortingCriterion === TwitterApiService.SORT_BY_RETWEETS) {
+          return (b.public_metrics?.retweet_count ?? 0) - (a.public_metrics?.retweet_count ?? 0)
+        } else {
           return 0
         }
-        return b.public_metrics.like_count - a.public_metrics.like_count
       })
       .slice(0, 10)
       .map((tweet) => {
