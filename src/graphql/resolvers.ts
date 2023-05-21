@@ -1,7 +1,7 @@
 // I get an error when importing this module. It works still.
 // chatGPT says this might come from the standard module loader not supporting
 // json files?! I do not know how to resolve this atm
-import sampleProjects from '../../assets/sampleProjects'
+// import sampleProjects from '../../assets/sampleProjects'
 
 type SocialMediaPresence = {
   platform: string
@@ -24,7 +24,7 @@ const resolvers = {
     // role here because GraphQL knows about the type -> --no-verify commit
     //
     // will check with Philipp whether and how to change this
-    projects: () => sampleProjects
+    // projects: () => sampleProjects
   },
   SocialMediaPresence: {
     // resolves the type of SocialMediaPresence based on the platform field
