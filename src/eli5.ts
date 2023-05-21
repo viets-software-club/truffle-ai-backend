@@ -1,80 +1,109 @@
+import { RequestBodyOpenAI, ResponseBodyOpenAi } from './types/index'
 
 /*
-The Interface for the json when sending the request
+This variable stores the request body as a JSON-formatted string for the "eli5" model. 
+It includes a system message to provide context for the conversation.
 */
-interface RequestBody {
-  model: string
-  messages: {
-    role: string
-    content: string
-  }[]
-}
+const request_body_Eli5 = `{"model":"gpt-3.5-turbo","messages":[{"role":"system","content":"You are a Computer Science Teacher talking to his students and the students do not have a deep technical understanding. So the teacher tries to stay simple"},{"role":"user","content":""}]}`
 
 /*
-The Interface to define the response expected when requesting from openai
+This variable stores the request body as a JSON-formatted string for the "hackernews" model.
+It includes a system message to provide context for the conversation.
 */
-interface Response {
-  id: string
-  object: string
-  created: number
-  model: string
-  usage: {
-    prompt_tokens: number
-    completion_tokens: number
-    total_tokens: number
-  }
-  choices: {
-    message: Record<string, string>
-    finish_reason: string
-    index: number
-  }[]
-}
-/*
-The request send to openai in the form of a string, so that It can later be modified. 
-*/
-const request_body = `{"model":"gpt-3.5-turbo","messages":[{"role":"system","content":"You are a Computer Science Teacher talking to his students and the students do not have a deep technical understanding. So the teacher tries to stay simple"},{"role":"user","content":""}]}`
+
+const request_body_Hackernews = `{"model":"gpt-3.5-turbo","messages":[{"role":"system","content":"You are trying to decide wether you would like to invest in a startup. So you are evaluating these comments"},{"role":"user","content":""}]}`
 
 /*
-The question that will later be send to openai inorder to get an answer by chatgtp
+This variable stores the question that will be used in the OpenAI request for the "eli5" model.
 */
-const question =
-    'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 50 words and do not get too technical'
-
-void openAIRequestTurbo()
-
+const questionEli5 =
+  'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 50 words and do not get too technical'
 
 /*
-THis methond send a request to openai and displays and console log the answer. The details for the question later have to be passed on as a parameter
+This variable stores the question that will be used in the OpenAI request for the "hackernews" model.
 */
 
-async function openAIRequestTurbo() {
-  
-  const jsonRequestBody = JSON.parse(request_body) as RequestBody;
-  jsonRequestBody.messages[1].content = question;
+const questionHackernews =
+  'The following comments are discussing a new software project. Please get general sentiment regarding the project and use percentage on wether people like it or not. Please stay at arround 50 words'
 
-  
+/*
+This async function sends a request to the OpenAI API for the "eli5" model
+and returns the content of the response. It takes a readME parameter, which should be 
+the text to be processed by ChatGPT. The request body is updated with the question and the text, 
+and the API call is made using the fetch function. The response is parsed and the content of the response message is returned.
+*/
+
+async function openAIRequestEli5(readME: string) {
+  const jsonRequestBody = JSON.parse(request_body_Eli5) as RequestBodyOpenAI
+  jsonRequestBody.messages[1].content = questionEli5
+
   try {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + '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' // process.env.OPENAI_API_KEY
       },
       method: 'POST',
       body: JSON.stringify(jsonRequestBody)
-    }).catch((): Response => {
-      console.log('klappt nicht')
-      return new Response()
     })
-    const data = (await response.json().catch(() => console.log('not a json'))) as Response
+    const data = (await response
+      .json()
+      .catch(() => console.log('not a json'))) as ResponseBodyOpenAi
     if (!data.choices[0]?.message?.content) {
       console.log(
         'The fetched response was empty. Most likely there is something wrong with the JSON request.'
       )
     } else {
       const content: string = data.choices[0].message.content
-      console.log(content)
+      return content
     }
-  } catch (error) {
-    console.log('An error occurred:', error)
+  } catch {
+    console.log('ai request did not work ')
+    return null
   }
 }
+
+/*
+This async function sends a request to the OpenAI API for the "hackernews" model and 
+returns the content of the response. It takes a comments parameter, which should be a 
+string containing comments to be processed by ChatGPT. The request body is updated with 
+the question and the comments, and the API call is made using the fetch function. The response 
+is parsed and the content of the response message is returned. 
+*/
+
+async function openAIRequestHackernews(comments: string) {
+  const jsonRequestBody = JSON.parse(request_body_Hackernews) as RequestBodyOpenAI
+  jsonRequestBody.messages[1].content = questionHackernews + ' ' + comments
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + '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' // process.env.OPENAI_API_KEY
+      },
+      method: 'POST',
+      body: JSON.stringify(jsonRequestBody)
+    })
+    console.log(response)
+    console.log('in  2 ai')
+    const data = (await response
+      .json()
+      .catch(() => console.log('not a json'))) as ResponseBodyOpenAi
+    console.log(data)
+    if (!data?.choices[0]?.message?.content) {
+      console.log(
+        'The fetched response was empty. Most likely there is something wrong with the JSON request.'
+      )
+      return null
+    } else {
+      const content: string = data?.choices[0]?.message?.content
+      console.log(content)
+      return content
+    }
+  } catch {
+    console.log('openai request did not work out. ')
+    return null
+  }
+}
+
+export { openAIRequestHackernews }

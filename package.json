@@ -30,8 +30,8 @@
     "husky": "^8.0.3",
     "lint-staged": "^13.2.2",
     "mercurius": "^13.0.0",
-    "prettier": "^2.8.8",
-     "dotenv": "^16.0.3"
+    "pre-commit": "^1.2.2",
+    "prettier": "^2.8.8"
   },
   "devDependencies": {
     "@types/node": "^18.16.3",
