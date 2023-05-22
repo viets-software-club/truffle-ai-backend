@@ -1,6 +1,6 @@
+.husky
 node_modules
-npm-debug.log*
+.env*
 dist
-.eslintcache
-.idea/*
+.mesh
 .env
