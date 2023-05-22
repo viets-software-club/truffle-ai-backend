@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "dev": "concurrently 'tsc -w' 'nodemon dist/listen.js'",
+    "dev": "concurrently \"tsc -w\" \"nodemon dist/listen.js\"",
     "start": "node dist/listen.js",
     "lint": "eslint ./src",
     "lint:debug": "eslint ./src --debug",
@@ -27,6 +27,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.0.3",
     "fastify": "^4.17.0",
     "graphql": "^16.6.0",
     "husky": "^8.0.3",

@@ -1,44 +1,126 @@
-import axios, { AxiosResponse } from 'axios'
-import * as cheerio from 'cheerio'
+import axios, { AxiosRequestConfig } from 'axios'
+import dotenv from 'dotenv'
 
-type LinkedInProfile = {
+dotenv.config()
+
+type LinkedInCompanyProfile = {
   name: string
-  employmentList: string[]
-  educationList: string[]
+  founded: string
+  sphere: string
+  followers: number
+  employeesAmountInLinkedin: string
+  about: string
+  website: string
+  crunchbaseUrl: string
+  industries: string
+  hqLocation: string
+  specialties: string
 }
 
-async function getCompanyInfosFromLinkedIn(linkedInHandle: string): Promise<LinkedInProfile> {
-  const basePath = 'https://www.linkedin.com/company/'
+type CompanyDataResponse = {
+  url: string
+  name: string
+  founded: string
+  sphere: string
+  followers: number
+  logo: string
+  image: string
+  employeesAmountInLinkedin: string
+  about: string
+  website: string
+  locations: string[]
+  employees: {
+    img: string
+    title: string
+    subtitle: string
+  }[]
+  updates: {
+    time: string
+    text: string
+    likes_count: number
+    comments_count: number
+  }[]
+  show_more: string[]
+  affiliated: {
+    title: string
+    subtitle: string
+    location: string
+    Links: string
+  }[]
+  browse_jobs: string[]
+  company_id: string
+  timestamp: string
+  slogan: string
+  crunchbase_url: string
+  stock_info: string
+  funding: string
+  investors: string
+  similarPages: string[]
+  Website: string
+  Industries: string
+  'Company size': string
+  Headquarters: string
+  Type: string
+  Specialties: string
+} | null
+
+const username = 'typescript2023'
+const apiKey = process.env.SCRAPING_BOT_API_KEY || ''
+const apiEndPoint = 'http://api.scraping-bot.io/scrape/data-scraper'
+const auth = 'Basic ' + Buffer.from(username + ':' + apiKey).toString('base64')
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+export async function getCompanyInfosFromLinkedIn(
+  linkedInHandle: string
+): Promise<LinkedInCompanyProfile> {
   try {
-    const response: AxiosResponse<string> = await axios.get(basePath + linkedInHandle)
-    if (!response.data) {
-      return {
-        name: '',
-        employmentList: [],
-        educationList: []
+    const requestConfig: AxiosRequestConfig = {
+      headers: {
+        Accept: 'application/json',
+        Authorization: auth
       }
     }
-    const DOM = cheerio.load(response.data)
-    console.log(response.data)
-    const name = DOM('div.ProfileHeaderCard > h1 > a').text().trim()
-    console.log(name)
+
+    const requestData = {
+      scraper: 'linkedinCompanyProfile',
+      url: 'https://linkedin.com/company/' + linkedInHandle
+    }
+
+    const response = await axios.post<{ responseId: string }>(
+      apiEndPoint,
+      requestData,
+      requestConfig
+    )
+    console.log(response)
+
+    let finalData: CompanyDataResponse | null = null
+    do {
+      await sleep(5000)
+      const responseUrl = `http://api.scraping-bot.io/scrape/data-scraper-response?scraper=linkedinCompanyProfile&responseId=${response.data.responseId}`
+      const finalDataResponse = await axios.get<CompanyDataResponse[]>(responseUrl, requestConfig)
+      finalData = finalDataResponse.data[0]
+    } while (finalData === null)
 
     return {
-      name: name,
-      employmentList: [],
-      educationList: []
+      name: finalData.name ?? '',
+      founded: finalData.founded ?? '',
+      sphere: finalData.sphere ?? '',
+      followers: finalData.followers ?? '',
+      employeesAmountInLinkedin: finalData.employeesAmountInLinkedin ?? 0,
+      about: finalData.about ?? '',
+      website: finalData.website ?? '',
+      crunchbaseUrl: finalData.crunchbase_url ?? '',
+      industries: finalData.Industries ?? '',
+      hqLocation: finalData.Headquarters ?? '',
+      specialties: finalData.Specialties ?? ''
     }
   } catch (error) {
     console.log(error)
-    throw new Error('Error while scraping company infos from LinkedIn')
+    throw new Error('Was not able to scrape company info for ' + linkedInHandle)
   }
 }
-
-void getCompanyInfosFromLinkedIn('ferrari').then((r) => console.log(r))
-
-/*
-  public async getPersonalInfosFromLinkedIn(linkedInHandle: string) {
-    const basePath = 'https://www.linkedin.com/in/';
-
-  }
-*/
