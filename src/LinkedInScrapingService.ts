@@ -75,17 +75,27 @@ function sleep(ms: number): Promise<void> {
   })
 }
 
+/**
+ * There is an inital POST with the scraping parameters to get a unique responseId from the API.
+ * The second GET request then finally returns the scraping result.
+ * It is important to note, that the API is using an Array of objects for the data attribute.
+ * According to their documentation, they needed to implement it in this two-request-way, because LinkedIn uses protection tools to avoid bots
+ * https://www.scraping-bot.io/web-scraping-documentation/#data-scraper-api
+ * @param linkedInHandle
+ * @returns the specified LinkedInCompanyProfileType including the most important data
+ */
 export async function getCompanyInfosFromLinkedIn(
   linkedInHandle: string
 ): Promise<LinkedInCompanyProfile> {
   try {
+    // builds the axios request configuration
     const requestConfig: AxiosRequestConfig = {
       headers: {
         Accept: 'application/json',
         Authorization: auth
       }
     }
-
+    // specifies the used scraping mechanism, which is in this case linkedinCompanyProfile
     const requestData = {
       scraper: 'linkedinCompanyProfile',
       url: 'https://linkedin.com/company/' + linkedInHandle
@@ -96,9 +106,9 @@ export async function getCompanyInfosFromLinkedIn(
       requestData,
       requestConfig
     )
-    console.log(response)
 
     let finalData: CompanyDataResponse | null = null
+    // sends the request until finalData is received
     do {
       await sleep(5000)
       const responseUrl = `http://api.scraping-bot.io/scrape/data-scraper-response?scraper=linkedinCompanyProfile&responseId=${response.data.responseId}`
