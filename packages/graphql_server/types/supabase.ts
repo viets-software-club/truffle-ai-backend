@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json }
+  | Json[]
 
 export interface Database {
   public: {
@@ -52,7 +58,7 @@ export interface Database {
           github_url: string | null
           id: string
           login: string | null
-          name: string
+          name: string | null
           repository_count: number | null
           twitter_username: string | null
           website_url: string | null
@@ -85,52 +91,52 @@ export interface Database {
       project: {
         Row: {
           about: string | null
-          contributor_count: string | null
+          contributor_count: number | null
           created_at: string | null
           eli5: string | null
-          fork_count: string | null
+          fork_count: number | null
           github_url: string | null
           id: string
           is_bookmarked: boolean | null
-          issue_count: string | null
+          issue_count: number | null
           name: string
           owned_by: string
-          pull_request_count: string | null
-          star_count: string | null
+          pull_request_count: number | null
+          star_count: number | null
           star_history: number[] | null
           website_url: string | null
         }
         Insert: {
           about?: string | null
-          contributor_count?: string | null
+          contributor_count?: number | null
           created_at?: string | null
           eli5?: string | null
-          fork_count?: string | null
+          fork_count?: number | null
           github_url?: string | null
           id?: string
           is_bookmarked?: boolean | null
-          issue_count?: string | null
+          issue_count?: number | null
           name: string
           owned_by: string
-          pull_request_count?: string | null
-          star_count?: string | null
+          pull_request_count?: number | null
+          star_count?: number | null
           star_history?: number[] | null
           website_url?: string | null
         }
         Update: {
           about?: string | null
-          contributor_count?: string | null
+          contributor_count?: number | null
           created_at?: string | null
           eli5?: string | null
-          fork_count?: string | null
+          fork_count?: number | null
           github_url?: string | null
           id?: string
           is_bookmarked?: boolean | null
-          issue_count?: string | null
+          issue_count?: number | null
           name?: string
           owned_by?: string
-          pull_request_count?: string | null
-          star_count?: string | null
+          pull_request_count?: number | null
+          star_count?: number | null
           star_history?: number[] | null
           website_url?: string | null
         }
