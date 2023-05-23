@@ -2,7 +2,14 @@ import axios, { AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import * as showdown from 'showdown'
 import * as starHistory from './starHistory'
-import { Developer, DeveloperRepo, GitHubInfo, OpenAIResponse, Repository } from './types'
+import {
+  Developer,
+  DeveloperRepo,
+  GitHubInfo,
+  GitHubOrganization,
+  OpenAIResponse,
+  Repository
+} from './types'
 
 /** Get all the information from the GitHub trending page; all the repos and the names of their creators
  * @param {number} timeMode 0: daily; 1: weekly; 2: monthly => timescope of the trending page
@@ -85,6 +92,34 @@ export async function getRepoInfo(query: string, authToken: string): Promise<Git
       }
     )
     return response.data.data.repository
+  } catch (error) {
+    return null
+  }
+}
+
+/** Gets a organizations information via GitHub's GraphQL API
+ * @param {string} query GraphQL query for the repo (including owner and name)
+ * @param {string} authToken personal authorization token
+ * @returns {any[]} the json data for the requested repo as by the graphql query; null on error
+ */
+export async function getOrganizationInfo(
+  query: string,
+  authToken: string
+): Promise<GitHubOrganization | null> {
+  try {
+    const response: AxiosResponse<{ data: { organization: GitHubOrganization } }> =
+      await axios.post(
+        'https://api.github.com/graphql',
+        {
+          query: query
+        },
+        {
+          headers: {
+            Authorization: authToken
+          }
+        }
+      )
+    return response.data.data.organization
   } catch (error) {
     return null
   }

@@ -12,6 +12,7 @@ export type Repository = {
   [key: string]: any
 }
 
+// Github info type as returned by GraphQL API
 export type GitHubInfo = {
   name: string
   description: string
@@ -23,21 +24,17 @@ export type GitHubInfo = {
   homepageUrl: string
 }
 
-// query {
-//   repository(owner: "${owner}", name: "${name}") {
-//     name
-//     description
-//     stargazerCount
-//     issues(filterBy: {states: [OPEN]}) {totalCount}
-//     forkCount
-//     pullRequests(states: [OPEN]) {totalCount}
-//     url
-//     homepageUrl
-//   owner {
-//     login
-//   }
-// }
-// }
+// Github organization info type as returned by GraphQL API
+export type GitHubOrganization = {
+  name: string
+  login: string
+  avatarUrl: string
+  repositories: { totalCount: number }
+  email: string
+  websiteUrl: string
+  twitterUsername: string
+  url: string
+}
 
 export type OpenAIResponse = {
   choices: {
