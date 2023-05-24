@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { openAIRequestHackernews } from './eli5'
 import {
   HackerNewsStoriesResponse,
@@ -7,107 +8,85 @@ import {
   GetHackerNewsCommentsResponseHitArray
 } from './types/index'
 
-/*
-This function checks if the elements on the first page are older than 2 months. 
-It takes a JSON-formatted date string as input and returns true if the date is more
-than two months ago, and false otherwise.
-*/
+/**
+ * Search Hacker News stories based on the given name, retrieve comments,
+ * and generate an OpenAI request.
+ * @param name - The search query to find Hacker News stories.
+ * @returns A promise that resolves to the OpenAI request.
+ */
+async function searchHackerNewsStories(name: string) {
+  const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
+  console.log(url)
+  const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
 
-function isMoreThanTwoMonthApart(jsonDate: string) {
-  const jsonDateObj: Date = new Date(jsonDate)
+  try {
+    const response = await axios.get(url)
+    const formattedJson = response.data as HackerNewsStoriesResponse
+    const hitslist: HackerNewsStoriesResponseHitsArray = formattedJson.hits
+
+    for (let i = 0; i < hitslist.length; i++) {
+      const hit: HackerNewsStoriesResponseHit = hitslist[i]
+      const createdAt: string = hit?.created_at
+      const objectId: string = hit?.objectID
+
+      if (!isMoreThanMonthsTwoAgo(createdAt)) {
+        const comments: string[] | undefined = await getHackerNewsCommentsByPostId(objectId)
+        if (comments) {
+          for (let j = 0; j < comments.length; j++) {
+            allComments.push(comments[j])
+          }
+        }
+      }
+    }
+
+    return openAIRequestHackernews(allComments.join(' '))
+  } catch (error) {
+    console.log('Error fetching HTML code:', error)
+  }
+}
+
+/**
+ * Retrieve Hacker News comments for a given story ID.
+ * @param story_id - The ID of the story to fetch comments for.
+ * @returns A promise that resolves to an array of comments.
+ */
+async function getHackerNewsCommentsByPostId(story_id: string) {
+  const url = `http://hn.algolia.com/api/v1/search?tags=comment,story_${story_id}`
+  const comments: string[] = [] //an array in which we store all the scraped comments
+
+  try {
+    const response = await axios.get(url)
+    const jsonData: GetHackerNewsCommentsResponseHits =
+      response?.data as GetHackerNewsCommentsResponseHits
+    const data: GetHackerNewsCommentsResponseHitArray = jsonData?.hits
+
+    for (let i = 0; i < data.length; i++) {
+      comments.push(data[i]?.comment_text)
+    }
+
+    console.log(`For story_id ${story_id}, so viele Kommentare gefunden: ${comments.length}`)
+    return comments
+  } catch (error) {
+    console.log('Error fetching data:', error)
+  }
+}
+
+/**
+ * Check if the given JSON-formatted date is more than two months ago.
+ * @param jsonDate - The JSON-formatted date string to compare.
+ * @returns A boolean indicating if the date is more than two months ago.
+ */
+function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
+  const jsonDateObj = new Date(jsonDate)
   const currentDate = new Date()
-
   const timeDiff = currentDate.getTime() - jsonDateObj.getTime()
-
   const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
-
   return timeDiff > twoMonthsInMillis
 }
 
-/*
-This function retrieves Hacker News stories based on the given name. It makes a request to the Hacker News API, extracts the required information from the JSON response,
- and stores the comments in a string. It also calls the getHackerNewsComments function 
- to retrieve comments for each story. The resulting comments are concatenated into the allComments string.
-*/
-
-function getHackerNewsStories(name: string) {
-  const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
-  console.log(url)
-  let allComments = ''
-
-  fetch(url)
-    .then(function (response) {
-      if (!response.ok) {
-        throw new Error('Error fetching HTML code')
-      }
-      return response.text()
-    })
-    .then(async function (htmlCode: string) {
-      try {
-        const formattedJson = JSON.parse(htmlCode) as HackerNewsStoriesResponse
-        const hitslist: HackerNewsStoriesResponseHitsArray = formattedJson['hits']
-
-        for (let i = 0; i < hitslist.length; i++) {
-          const hit: HackerNewsStoriesResponseHit = hitslist[i]
-          const createdAt: string = hit.created_at
-          const objectId: string = hit.objectID
-
-          if (!isMoreThanTwoMonthApart(createdAt)) {
-            const comments = await getHackerNewsComments(objectId)
-            for (let i = 0; i < comments.length; i++) {
-              allComments += comments[i]
-              allComments += '\n'
-            }
-          }
-        }
-        return openAIRequestHackernews(allComments)
-      } catch {
-        console.log('received json file has the wrong format')
-      }
-    })
-    .catch(function (error) {
-      console.log('Error fetching HTML code:', error)
-    })
+/**
+ * Entry point of the program. /Test main method
+ */
+function main(): void {
+  void searchHackerNewsStories('e2b')
 }
-
-/*
-This async function receives the ID of a story and returns the comments associated with that story.
-It fetches the comments from the Hacker News API in JSON format, processes the JSON response, and
-returns an array of comment texts.
-*/
-
-async function getHackerNewsComments(story_id: string) {
-  const url = `http://hn.algolia.com/api/v1/search?tags=comment,story_${story_id}`
-  const comments: string[] = []
-
-  await fetch(url)
-    .then(function (response) {
-      if (response.ok) {
-        return response.json()
-      } else {
-        throw new Error('Error fetching data')
-      }
-    })
-    .then(function (jsonData: GetHackerNewsCommentsResponseHits) {
-      const data: GetHackerNewsCommentsResponseHitArray = jsonData?.hits
-      for (let i = 0; i < data.length; i++) {
-        comments.push(data[i].comment_text)
-      }
-    })
-    .catch(function (error) {
-      console.log('Error fetching data:', error)
-    })
-
-  console.log(`For story_id  ${story_id} , so viele Kommentare gefunden:  ${comments.length}`)
-  return comments
-}
-
-/*
-This method can be used to test the current implementation
-*/
-
-function main() {
-  getHackerNewsStories('e2b')
-}
-
-main()
