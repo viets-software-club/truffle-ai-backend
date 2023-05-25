@@ -22,5 +22,8 @@ COPY ./packages/graphql_server .
 
 RUN npm run build
 
+RUN rm README.md
+RUN rm -r ./src
+
 EXPOSE ${SERVER_PORT}
 CMD ["npm", "run", "serve"]

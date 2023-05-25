@@ -33,5 +33,7 @@ COPY ./packages/graphql_gateway .
 
 RUN npm run build
 
+RUN rm README.md
+
 EXPOSE ${GATEWAY_PORT}
 CMD ["npm", "run", "serve"]
