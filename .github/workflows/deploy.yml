@@ -44,4 +44,4 @@ jobs:
       - name: Deploy to DigitalOcean Kubernetes
         run: kubectl apply -f $GITHUB_WORKSPACE/config/deployment.yml
       - name: Verify deployment
-        run: kubectl rollout status --timeout 30s deployment/truffle-ai-deployment
+        run: kubectl rollout status --timeout 60s deployment/truffle-ai-deployment
