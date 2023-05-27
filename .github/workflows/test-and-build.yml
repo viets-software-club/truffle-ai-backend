@@ -7,7 +7,6 @@ on:
   pull_request:
     branches: ['main']
 env:
-  SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
   SUPABASE_REFERENCE_ID: ${{ vars.SUPABASE_REFERENCE_ID }}
   SUPABASE_URL: ${{ vars.SUPABASE_URL }}
   SUPABASE_GRAPHQL_URL: ${{ vars.SUPABASE_GRAPHQL_URL }}
@@ -37,3 +36,5 @@ jobs:
         run: NODE_ENV=test npm run test
       - name: Build
         run: NODE_ENV=production npm run build
+        env:
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
