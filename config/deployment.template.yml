@@ -26,18 +26,18 @@ spec:
             - containerPort: $GATEWAY_PORT
           resources:
             requests:
-              cpu: 100m
+              cpu: 20m
             limits:
-              cpu: 100m
+              cpu: 20m
         - name: truffle-ai-graphql-server
           image: <IMAGE-GRAPHQL-SERVER>
           ports:
             - containerPort: $SERVER_PORT
           resources:
             requests:
-              cpu: 100m
+              cpu: 20m
             limits:
-              cpu: 100m
+              cpu: 20m
 ---
 apiVersion: v1
 kind: Service
