@@ -7,9 +7,20 @@ on:
       - 'packages/**'
       - 'Dockerfile'
       - '.github/workflows/**'
+env:
+  SUPABASE_API_KEY: ${{secrets.SUPABASE_API_KEY}}
+  NODE_ENV: ${{vars.NODE_ENV}}
+  SUPABASE_REFERENCE_ID: ${{vars.SUPABASE_REFERENCE_ID}}
+  SUPABASE_URL: ${{vars.SUPABASE_URL}}
+  SUPABASE_GRAPHQL_URL: ${{vars.SUPABASE_GRAPHQL_URL}}
+  GATEWAY_PORT: ${{vars.GATEWAY_PORT}}
+  SERVER_PORT: ${{vars.SERVER_PORT}}
+  SERVER_URL: ${{vars.SERVER_URL}}
+  SERVER_GRAPHQL_URL: ${{vars.SERVER_GRAPHQL_URL}}
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout main
         uses: actions/checkout@main
