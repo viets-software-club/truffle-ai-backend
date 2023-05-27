@@ -31,8 +31,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - name: Install npm packages
-        run: npm ci
+        run: NODE_ENV=test npm ci
       - name: Test
-        run: npm run test
+        run: NODE_ENV=test npm run test
       - name: Build
         run: NODE_ENV=production npm run build
