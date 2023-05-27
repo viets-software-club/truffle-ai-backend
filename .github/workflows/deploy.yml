@@ -7,11 +7,9 @@ on:
       - 'packages/**'
       - 'Dockerfile'
       - '.github/workflows/**'
-env:
-  SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
-  SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-  SUPABASE_GRAPHQL_URL: ${{ vars.SUPABASE_GRAPHQL_URL }}
-  SERVER_PORT: ${{ vars.SERVER_PORT }}
+    pull_request:
+      types: [synchronize]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,10 +23,10 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Build truffle-ai-graphql-gateway image
         working-directory: ./packages/graphql_gateway
-        run: docker build --build-arg SERVER_GRAPHQL_URL=${{ vars.SERVER_GRAPHQL_URL }}--build-arg SUPABASE_URL=${{ vars.SUPABASE_URL }} --build-arg SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }} --build-arg SUPABASE_GRAPHQL_URL=${{ vars.SUPABASE_GRAPHQL_URL }} -t registry.digitalocean.com/truffle-ai-containers/truffle-ai-graphql-gateway:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build --build-arg GATEWAY_PORT=${{ vars.GATEWAY_PORT }} --build-arg SERVER_GRAPHQL_URL=${{ vars.SERVER_GRAPHQL_URL }}--build-arg SUPABASE_URL=${{ vars.SUPABASE_URL }} --build-arg SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }} --build-arg SUPABASE_GRAPHQL_URL=${{ vars.SUPABASE_GRAPHQL_URL }} -t registry.digitalocean.com/truffle-ai-containers/truffle-ai-graphql-gateway:$(echo $GITHUB_SHA | head -c7) -f ./packages/graphql_gateway/Dockerfile .
       - name: Build truffle-ai-graphql-server image
         working-directory: ./packages/graphql_server
-        run: docker build --build-arg SERVER_PORT=${{ vars.SERVER_PORT }} -t registry.digitalocean.com/truffle-ai-containers/truffle-ai-graphql-server:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build --build-arg SERVER_PORT=${{ vars.SERVER_PORT }} -t registry.digitalocean.com/truffle-ai-containers/truffle-ai-graphql-server:$(echo $GITHUB_SHA | head -c7) -f ./packages/graphql_server/Dockerfile .
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
       - name: Push truffle-ai-graphql-gateway image to DigitalOcean Container Registry
