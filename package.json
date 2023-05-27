@@ -6,7 +6,7 @@
     "dev": "concurrently -c 'gray,magenta' 'npm run dev:graphql_gateway' 'npm run dev:graphql_server'",
     "dev:graphql_gateway": "npm run dev -w graphql_gateway",
     "dev:graphql_server": "npm run dev -w graphql_server",
-    "build": "concurrently -c 'gray,magenta' 'npm run build:graphql_gatway' 'npm run build:graphql_server'",
+    "build": "concurrently -c 'gray,magenta' 'npm run build:graphql_gateway' 'npm run build:graphql_server'",
     "build:graphql_gateway": "npm run build -w graphql_gateway",
     "build:graphql_server": "npm run build -w graphql_server",
     "serve": "concurrently -c 'gray,magenta' 'sleep 3 && npm run serve:graphql_gateway' 'npm run serve:graphql_server'",
