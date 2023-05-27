@@ -33,7 +33,7 @@ jobs:
       - name: Install production packages
         run: npm ci --production
       - name: Build
-        run: NODE_ENV=production npm run build
+        run: NODE_ENV=production npm run build -ws
       - name: Install all packages
         run: npm ci
       - name: Test
