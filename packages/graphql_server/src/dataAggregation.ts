@@ -1,9 +1,18 @@
-import { GitHubOrganization, GitHubInfo } from './types'
-import { getOrganizationInfo, getRepoInfo } from './ScrapeRepos'
-import { OrganizationInsertion, ProjectInsertion } from './dbUpdater'
+import { GitHubOrganization, GitHubInfo } from '../types/githubApi.types'
+import { getOrganizationInfo, getRepoInfo } from './api/githubApi'
+import { OrganizationInsertion, ProjectInsertion } from '../types/dataAggregation.types'
 import supabase from './supabase'
 
+/**
+ * Returns the info for a repository in a format that can be inserted into the DB.
+ * It goes through all data sources and aggregates the data.
+ * @param {string} name - The name of the repository.
+ * @param {string} owner - The name of the organization.
+ * @returns {ProjectInsertion | null} The info for the repository in a format that can be inserted into the DB.
+ */
 export const aggregateDataForRepo = async (name: string, owner: string) => {
+  let repoInfo: ProjectInsertion | null = null
+  // query send to github. If this is changed the corresponding types have to be changed as well
   const query = `query {
     repository(owner: "${owner}", name: "${name}") {
       name 
@@ -20,10 +29,14 @@ export const aggregateDataForRepo = async (name: string, owner: string) => {
   }
   }`
 
-  // getRepoInfo(query, 'Bearer ' + )
-  const repoGHdata: GitHubInfo | null = await getRepoInfo(query, 'Bearer ' + 'api key XXXXXXXXXXXX')
+  // call github api
+  const repoGHdata: GitHubInfo | null = await getRepoInfo(
+    query,
+    'Bearer ' + process.env.GITHUB_API_TOKEN
+  )
 
   if (repoGHdata === null) {
+    console.error('Could not get GitHub data for repo', name)
     return null
   }
 
@@ -31,7 +44,7 @@ export const aggregateDataForRepo = async (name: string, owner: string) => {
 
   // @Todo aggregate more data for the repo
 
-  return {
+  repoInfo = {
     name: repoGHdata.name,
     about: repoGHdata.description,
     star_count: repoGHdata.stargazerCount,
@@ -44,15 +57,30 @@ export const aggregateDataForRepo = async (name: string, owner: string) => {
     owned_by: organizationID ?? '634b6eb5-30c8-4818-81d3-e1d98cb0b2c7',
     is_bookmarked: false
   }
+
+  return repoInfo
 }
 
+/**
+ * Returns the organization id for the given organization name.
+ * It tries to get that id from the DB. If it is not in the DB it gets the data from github and inserts it into the DB.
+ * @param {string} owner - The name of the organization.
+ * @returns {string} The id of the organization.
+ */
 const getOrganizationID = async (owner: string) => {
-  const { data, error } = await supabase.from('organization').select('id').eq('name', owner)
+  const { data: organization, error: getOrganizationError } = await supabase
+    .from('organization')
+    .select('id')
+    .eq('name', owner)
+  getOrganizationError &&
+    console.error('Error getting organization', owner, 'from database: \n', getOrganizationError)
 
-  if (data && data[0]) {
-    return data[0].id
+  // if a organization with this name is already in the database return the id
+  if (organization && organization[0]) {
+    return organization[0].id
   }
 
+  // if not get the data from github and insert it into the database
   const query = `query {
       organization(login: "${owner}") {
         login
@@ -66,30 +94,30 @@ const getOrganizationID = async (owner: string) => {
     }
     }`
 
-  const organizationInfo: GitHubOrganization | null = await getOrganizationInfo(
+  const organizationGHData: GitHubOrganization | null = await getOrganizationInfo(
     query,
-    'Bearer ' + 'api key XXXXXXXXXXXx'
+    'Bearer ' + process.env.GITHUB_API_TOKEN
   )
-  if (organizationInfo !== null) {
+
+  if (organizationGHData !== null) {
     const organizationDataDBFormat: OrganizationInsertion = {
-      name: organizationInfo.name,
-      login: organizationInfo.login,
-      avatar_url: organizationInfo.avatarUrl,
-      repository_count: organizationInfo.repositories.totalCount,
-      email: organizationInfo.email,
-      website_url: organizationInfo.websiteUrl,
-      twitter_username: organizationInfo.twitterUsername,
-      github_url: organizationInfo.url
+      name: organizationGHData.name,
+      login: organizationGHData.login,
+      avatar_url: organizationGHData.avatarUrl,
+      repository_count: organizationGHData.repositories.totalCount,
+      email: organizationGHData.email,
+      website_url: organizationGHData.websiteUrl,
+      twitter_username: organizationGHData.twitterUsername,
+      github_url: organizationGHData.url
     }
 
-    const { data: data2, error: error2 } = await supabase
+    const { error: insertOrganizationError } = await supabase
       .from('organization')
       .insert([organizationDataDBFormat])
+    insertOrganizationError &&
+      console.error('Error inserting organization into database: \n', insertOrganizationError)
 
-    const { data: orga, error: error3 } = await supabase
-      .from('organization')
-      .select('id')
-      .eq('name', owner)
+    const { data: orga } = await supabase.from('organization').select('id').eq('name', owner)
 
     if (orga && orga[0]) {
       return orga[0].id

@@ -1,31 +1,28 @@
-import { Database } from '../types/supabase'
-import { fetchRepos, getOrganizationInfo, getRepoInfo } from './ScrapeRepos'
-import { formatAndEnrich } from './formatAndEnrich'
+import { fetchTrendingRepos } from './scraping/githubScraping'
+import { processRepo } from './processRepo'
 import supabase from './supabase'
 
-// type Repository = Pick<Database['public']['Tables']['project']['Row'], 'name' | 'owned_by'>
-export type ProjectInsertion = Database['public']['Tables']['project']['Insert']
-export type OrganizationInsertion = Database['public']['Tables']['organization']['Insert']
-
-const dbUpdater = async () => {
+export const dbUpdater = async () => {
   // delete all projects that are not bookmarked and older than 23 hours and 50 minutes
-  // deleteOldProjects()
-  const { error: deletionError } = await supabase
+  const { error: deleteReposError } = await supabase
     .from('project')
     .delete()
     .eq('is_bookmarked', false)
     .lt('created_at', getCutOffTime(23, 50))
+  deleteReposError && console.error('Error while deleting old projects: \n', deleteReposError)
 
-  // getAllProjects()
   // get all projects that remain in the database
-  const { data: existingRepos, error: error2 } = await supabase
+  const { data: existingRepos, error: getReposError } = await supabase
     .from('project')
     .select('name, owned_by')
+  getReposError && console.error('Error while getting all projects: \n', getReposError)
 
-  // getAllOrganizations()
-  const { data: organizations, error: error3 } = await supabase
+  // get all organizations in the database
+  const { data: organizations, error: getOrganizationsError } = await supabase
     .from('organization')
     .select('id, name')
+  getOrganizationsError &&
+    console.error('Error while getting all organizations: \n', getOrganizationsError)
 
   // update all remaining projects
   if (existingRepos) {
@@ -36,16 +33,8 @@ const dbUpdater = async () => {
     }
   }
 
-  // get trending repos from github
-  const trendingRepos = await fetchRepos(0)
-  console.log(trendingRepos)
-
-  // enrich them with all data that is gathered
-  // format them so they can be stored in the db
-  await formatAndEnrich(trendingRepos)
-
-  // const { error: insertionError } = await supabase.from('project').insert(reposToBeAdded)
-  // console.log(insertionError)
+  // get the new trending repos and process them one by one
+  await goThroughListOfRepos(await fetchTrendingRepos('daily'))
 }
 
 const getCutOffTime: (hours: number, minutes: number) => string = (
@@ -65,4 +54,10 @@ const updateRepo = (name: string, owner: string) => {
   return null
 }
 
-void dbUpdater()
+const goThroughListOfRepos = async (repos: string[]) => {
+  for (let i = 0; i < repos.length / 2; i++) {
+    const owner = repos[2 * i]
+    const name = repos[2 * i + 1]
+    await processRepo(name, owner)
+  }
+}
