@@ -61,3 +61,5 @@ async function main(timeMode: timeMode) {
   // get the developers
   // console.log(scrape.fetchTrendingDevelopers(timeMode))
 }
+
+void main('daily')

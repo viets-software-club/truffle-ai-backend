@@ -2,6 +2,9 @@ import { fetchTrendingRepos } from './scraping/githubScraping'
 import { processRepo } from './processRepo'
 import supabase from './supabase'
 
+/**
+ * Updates the database with the current trending repositories. Also Deletes old projects.
+ */
 export const dbUpdater = async () => {
   // delete all projects that are not bookmarked and older than 23 hours and 50 minutes
   const { error: deleteReposError } = await supabase
@@ -37,6 +40,12 @@ export const dbUpdater = async () => {
   await goThroughListOfRepos(await fetchTrendingRepos('daily'))
 }
 
+/**
+ * Calculates time specified by the parameters
+ * @param {number} hours - The number of hours to subtract.
+ * @param {number} minutes - The number of minutes to subtract.
+ * @returns {string} The specified time in ISO format.
+ */
 const getCutOffTime: (hours: number, minutes: number) => string = (
   hours: number,
   minutes: number
@@ -54,6 +63,10 @@ const updateRepo = (name: string, owner: string) => {
   return null
 }
 
+/**
+ * Goes throuhg the list of repos and processes them one by one.
+ * @param {string[]} repos - The repos to go through
+ */
 const goThroughListOfRepos = async (repos: string[]) => {
   for (let i = 0; i < repos.length / 2; i++) {
     const owner = repos[2 * i]

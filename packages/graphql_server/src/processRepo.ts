@@ -2,6 +2,12 @@ import supabase from './supabase'
 import { aggregateDataForRepo } from './dataAggregation'
 import { ProjectInsertion } from '../types/dataAggregation.types'
 
+/**
+ * Initiates the processing of a repo. It first checks whether the repo is already in the database.
+ * If not it lets the data aggregation process run and then inserts the repo into the database.
+ * @param {string} name - The name of the repo.
+ * @param {owner} owner - The name of the owner of the repo.
+ */
 export const processRepo = async (name: string, owner: string) => {
   // if it is in the database already nothing has to be done with this repo
   if (await repoIsAlreadyInDB(name, owner)) {
@@ -28,6 +34,12 @@ export const processRepo = async (name: string, owner: string) => {
   }
 }
 
+/**
+ * Checks if the repo is already in the db.
+ * @param {string} name - The name  of the repo.
+ * @param {string} b - The name of the owner of the repo.
+ * @returns {boolean} True if the repo is already in the db.
+ */
 const repoIsAlreadyInDB = async (name: string, owner: string) => {
   // check if there are repositories with the same name
   const { data: matchingRepos, error: checkRepoIfRepoInDBError } = await supabase
@@ -46,7 +58,7 @@ const repoIsAlreadyInDB = async (name: string, owner: string) => {
 
   // for each of those with the same name check if the owner has the same name
   for (const repo of matchingRepos) {
-    const { data: currentOrg, error: checkRepoIfOrgInDBError } = await supabase
+    const { data: currentOrg } = await supabase
       .from('organization')
       .select('*')
       .eq('id', repo.owned_by)
