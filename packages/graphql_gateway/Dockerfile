@@ -1,6 +1,6 @@
 # Run this file only from ../../ !!!
 FROM node:18-alpine
-ENV NODE_ENV=production
+ENV NODE_ENV=build
 ARG SUPABASE_URL
 ARG SUPABASE_API_KEY
 ARG SUPABASE_GRAPHQL_URL
@@ -26,14 +26,21 @@ RUN apk --no-cache --virtual build-dependencies add \
   python3 \
   make \
   g++ \
-  && npm ci --omit=dev -w graphql_gateway \
+  && npm ci -w graphql_gateway \
   && apk del build-dependencies
 
 COPY ./packages/graphql_gateway .
 
 RUN npm run build
 
+# delete files
 RUN rm README.md
+WORKDIR /app
+RUN rm -r ./node_modules
 
+# install production packages and serve
+ENV NODE_ENV=production
+WORKDIR /app/packages/graphql_gateway
+RUN npm ci --omit=dev -w graphql_gateway
 EXPOSE ${GATEWAY_PORT}
 CMD ["npm", "run", "serve"]
