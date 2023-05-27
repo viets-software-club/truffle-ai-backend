@@ -12,6 +12,30 @@ export type Repository = {
   [key: string]: any
 }
 
+export type OpenAIResponse = {
+  choices: {
+    message: {
+      content: string
+    }
+  }[]
+}
+
+export type StargazersData = {
+  length: number
+  headers: {
+    link?: string
+  }
+  status: number
+  starred_at: string
+}
+
+export type StarRecord = {
+  date: string
+  count: number
+}
+
+export type timeMode = 'daily' | 'weekly' | 'monthly'
+
 // Github info type as returned by GraphQL API
 export type GitHubInfo = {
   name: string
@@ -34,26 +58,4 @@ export type GitHubOrganization = {
   websiteUrl: string
   twitterUsername: string
   url: string
-}
-
-export type OpenAIResponse = {
-  choices: {
-    message: {
-      content: string
-    }
-  }[]
-}
-
-export type StargazersData = {
-  length: number
-  headers: {
-    link?: string
-  }
-  status: number
-  starred_at: string
-}
-
-export type StarRecord = {
-  date: string
-  count: number
 }
