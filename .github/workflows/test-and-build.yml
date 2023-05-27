@@ -37,4 +37,4 @@ jobs:
       - name: Build
         run: NODE_ENV=production npm run build
         env:
-          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          SUPABASE_API_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpcG5oa21rbG1idXhqd3pwaXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ1MTU3NTcsImV4cCI6MjAwMDA5MTc1N30.r_sih3YT0PqgHoYC59LxBA7OO2SXkAcLX44KRs1Q7O0
