@@ -42,7 +42,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: truffle-ai-service
+  name: truffle-ai-load-balancer
 spec:
   type: LoadBalancer
   ports:
