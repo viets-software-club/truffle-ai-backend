@@ -24,18 +24,15 @@ jobs:
         node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
-      - run: echo ${{ env.SUPABASE_URL }}
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - name: Install production packages
-        run: npm ci --production
-      - name: Build
-        run: NODE_ENV=production npm run build -ws
-      - name: Install all packages
+      - name: Install npm packages
         run: npm ci
       - name: Test
         run: npm run test
+      - name: Build
+        run: NODE_ENV=production npm run build
