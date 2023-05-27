@@ -71,4 +71,4 @@ COPY --from=build /app/packages/graphql_server/src/graphql/schema.ts /app/packag
 RUN npm ci --omit=dev -w graphql_gateway
 ## serve on GATEWAY_PORT
 EXPOSE ${GATEWAY_PORT}
-CMD ["npm", "run", "serve", "-w", "graphql_server"]
+CMD ["npm", "run", "serve", "-w", "graphql_gateway"]

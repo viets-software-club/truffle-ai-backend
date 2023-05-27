@@ -49,4 +49,4 @@ COPY --from=build /app/packages/graphql_server/dist /app/packages/graphql_server
 RUN npm ci --omit=dev -w graphql_server
 ## serve on SERVER_PORT
 EXPOSE ${SERVER_PORT}
-CMD ["npm", "run", "serve"]
+CMD ["npm", "run", "serve", "-w", "graphql_server"]
