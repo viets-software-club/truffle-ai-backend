@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { GitHubOrganization, GitHubInfo } from '../../types/githubApi.types'
+import { GitHubOrganization, GitHubInfo } from '../../types/githubApi'
 
 /** Gets the repo's information via GitHub's GraphQL API
  * @param {string} query GraphQL query for the repo (including owner and name)

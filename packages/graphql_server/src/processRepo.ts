@@ -1,6 +1,6 @@
 import supabase from './supabase'
 import { aggregateDataForRepo } from './dataAggregation'
-import { ProjectInsertion } from '../types/dataAggregation.types'
+import { ProjectInsertion } from '../types/dataAggregation'
 
 /**
  * Initiates the processing of a repo. It first checks whether the repo is already in the database.

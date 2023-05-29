@@ -1,6 +1,6 @@
-import { GitHubOrganization, GitHubInfo } from '../types/githubApi.types'
+import { GitHubOrganization, GitHubInfo } from '../types/githubApi'
 import { getOrganizationInfo, getRepoInfo } from './api/githubApi'
-import { OrganizationInsertion, ProjectInsertion } from '../types/dataAggregation.types'
+import { OrganizationInsertion, ProjectInsertion } from '../types/dataAggregation'
 import supabase from './supabase'
 
 /**
