@@ -61,7 +61,7 @@ export async function getRepoFounders(owner: string, name: string): Promise<Proj
           }
         }
       }`
-      
+
   // Building the AxiosRequest and initiate the post request
   const authToken = 'Bearer ' + (process.env.GITHUB_API_TOKEN || '')
   const response: AxiosResponse<{ data: { repository: GitHubCommitHistory } }> = await axios.post(
