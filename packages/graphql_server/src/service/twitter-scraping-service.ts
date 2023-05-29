@@ -102,15 +102,9 @@ async function getTwitterUserByHandle(twitterHandle: string): Promise<TwitterUse
     do {
       await sleep(5000)
       const responseUrl = `http://api.scraping-bot.io/scrape/data-scraper-response?scraper=twitterProfile&responseId=${response.data.responseId}`
-      const finalDataResponse = await axios.get<TwitterProfileResponse>(
-        responseUrl,
-        requestConfig
-      )
-      console.log(finalDataResponse)
+      const finalDataResponse = await axios.get<TwitterProfileResponse>(responseUrl, requestConfig)
       data = finalDataResponse.data
     } while (data === null)
-
-    console.log(data)
 
     return {
       profileName: data.profile_name ?? '',
