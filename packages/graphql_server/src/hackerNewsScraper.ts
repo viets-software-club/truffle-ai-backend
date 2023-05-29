@@ -90,5 +90,4 @@ function main(): void {
   void searchHackerNewsStories('e2b')
 }
 
-
 main()
