@@ -58,13 +58,13 @@ const getCutOffTime: (hours: number, minutes: number) => string = (
 
 // daily: gh + twitter
 // weekly: rest
-// @TODO: imlement
+// @TODO: implement
 const updateRepo = (name: string, owner: string) => {
   return null
 }
 
 /**
- * Goes throuhg the list of repos and processes them one by one.
+ * Goes through the list of repos and processes them one by one.
  * @param {string[]} repos - The repos to go through
  */
 const goThroughListOfRepos = async (repos: string[]) => {

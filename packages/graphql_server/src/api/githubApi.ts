@@ -30,21 +30,16 @@ export async function getOrganizationInfo(
   query: string,
   authToken: string
 ): Promise<GitHubOrganization | null> {
-  try {
-    const response: AxiosResponse<{ data: { organization: GitHubOrganization } }> =
-      await axios.post(
-        'https://api.github.com/graphql',
-        {
-          query: query
-        },
-        {
-          headers: {
-            Authorization: authToken
-          }
-        }
-      )
-    return response.data.data.organization
-  } catch (error) {
-    return null
-  }
+  const response: AxiosResponse<{ data: { organization: GitHubOrganization } }> = await axios.post(
+    'https://api.github.com/graphql',
+    {
+      query: query
+    },
+    {
+      headers: {
+        Authorization: authToken
+      }
+    }
+  )
+  return response.data.data.organization
 }

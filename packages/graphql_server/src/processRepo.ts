@@ -65,14 +65,7 @@ const repoIsAlreadyInDB = async (name: string, owner: string) => {
 
     // the owner has the same name -> the repo is already in the database
     // atm also checks whether the owner is vercel because vercel is inserted whenever the owner is a user not a organization
-    if (
-      currentOrg &&
-      currentOrg[0] &&
-      currentOrg[0].login !== 'vercel' &&
-      currentOrg[0].login === owner
-    ) {
-      return true
-    }
+    if (currentOrg?.[0]?.login !== 'vercel' && currentOrg?.[0]?.login === owner) return true
   }
 
   return false

@@ -45,15 +45,15 @@ export const aggregateDataForRepo = async (name: string, owner: string) => {
   // @Todo aggregate more data for the repo
 
   repoInfo = {
-    name: repoGHdata.name,
-    about: repoGHdata.description,
-    star_count: repoGHdata.stargazerCount,
-    issue_count: repoGHdata.issues.totalCount,
-    fork_count: repoGHdata.forkCount,
-    pull_request_count: repoGHdata.pullRequests.totalCount,
+    name: repoGHdata?.name,
+    about: repoGHdata?.description,
+    star_count: repoGHdata?.stargazerCount,
+    issue_count: repoGHdata?.issues.totalCount,
+    fork_count: repoGHdata?.forkCount,
+    pull_request_count: repoGHdata?.pullRequests?.totalCount,
     contributor_count: 1,
-    github_url: repoGHdata.url,
-    website_url: repoGHdata.homepageUrl,
+    github_url: repoGHdata?.url,
+    website_url: repoGHdata?.homepageUrl,
     owned_by: organizationID ?? '634b6eb5-30c8-4818-81d3-e1d98cb0b2c7',
     is_bookmarked: false
   }
@@ -68,17 +68,20 @@ export const aggregateDataForRepo = async (name: string, owner: string) => {
  * @returns {string} The id of the organization.
  */
 const getOrganizationID = async (owner: string) => {
-  const { data: organization, error: getOrganizationError } = await supabase
+  const { data: organization, error: organizationRetrievalError } = await supabase
     .from('organization')
     .select('id')
-    .eq('name', owner)
-  getOrganizationError &&
-    console.error('Error getting organization', owner, 'from database: \n', getOrganizationError)
+    .eq('login', owner)
+  organizationRetrievalError &&
+    console.error(
+      'Error getting organization',
+      owner,
+      'from database: \n',
+      organizationRetrievalError
+    )
 
   // if a organization with this name is already in the database return the id
-  if (organization && organization[0]) {
-    return organization[0].id
-  }
+  if (organization?.[0]?.id) return organization[0].id
 
   // if not get the data from github and insert it into the database
   const query = `query {
@@ -111,16 +114,18 @@ const getOrganizationID = async (owner: string) => {
       github_url: organizationGHData.url
     }
 
-    const { error: insertOrganizationError } = await supabase
+    const { error: organizationInsertionError } = await supabase
       .from('organization')
       .insert([organizationDataDBFormat])
-    insertOrganizationError &&
-      console.error('Error inserting organization into database: \n', insertOrganizationError)
+    organizationInsertionError &&
+      console.error('Error inserting organization into database: \n', organizationInsertionError)
 
-    const { data: orga } = await supabase.from('organization').select('id').eq('name', owner)
+    const { data: orga } = await supabase.from('organization').select('id').eq('login', owner)
 
-    if (orga && orga[0]) {
+    if (orga?.[0]?.id) {
       return orga[0].id
+    } else {
+      return null
     }
   }
 }
