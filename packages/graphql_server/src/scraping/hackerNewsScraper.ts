@@ -1,7 +1,12 @@
 import axios from 'axios'
-import { getSentimentForProjectFromHackernewsComments } from '../api/openAIApi';
-import { HackerNewsStoriesResponse, HackerNewsStoriesResponseHitsArray, HackerNewsStoriesResponseHit, GetHackerNewsCommentsResponseHitArray, GetHackerNewsCommentsResponseHits } from '../../types/hackerNews';
-
+import { openAIRequestHackernews } from './chatGTPMethods'
+import {
+  HackerNewsStoriesResponse,
+  HackerNewsStoriesResponseHitsArray,
+  HackerNewsStoriesResponseHit,
+  GetHackerNewsCommentsResponseHits,
+  GetHackerNewsCommentsResponseHitArray
+} from '../'
 
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
@@ -11,6 +16,7 @@ import { HackerNewsStoriesResponse, HackerNewsStoriesResponseHitsArray, HackerNe
  */
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
+  console.log(url)
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
 
   try {
@@ -32,7 +38,7 @@ async function searchHackerNewsStories(name: string) {
         }
       }
     }
-    return getSentimentForProjectFromHackernewsComments(allComments.join(' '))//returns sentiment regarding the proejct as a string
+    return openAIRequestHackernews(allComments.join(' '))
   } catch (error) {
     console.log('Error fetching HTML code:', error)
   }
@@ -77,4 +83,11 @@ function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
   return timeDiff > twoMonthsInMillis
 }
 
-export {searchHackerNewsStories}
+/**
+ * Entry point of the program. /Test main method
+ */
+function main(): void {
+  void searchHackerNewsStories('e2b')
+}
+
+main()
