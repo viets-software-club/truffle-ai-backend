@@ -1,32 +1,75 @@
 import axios, { AxiosResponse } from 'axios'
-import dotenv from 'dotenv'
+import {
+  GitHubOrganization,
+  GitHubInfo,
+  GitHubUser,
+  ProjectFounder,
+  GitHubCommitHistory
+} from '../../types/githubApi'
 
-dotenv.config()
+const githubApiUrl = 'https://api.github.com/graphql'
 
-type ProjectFounder = {
-  name: string
-  login: string
-  twitterUsername: string
-}
-
-type GitHubCommitHistory = {
-  defaultBranchRef: {
-    target: {
-      history: {
-        edges: {
-          node: {
-            author: {
-              user: {
-                name: string
-                login: string
-                twitterUsername: string
-              }
-            }
-          }
-        }[]
+/** Gets the repo's information via GitHub's GraphQL API
+ * @param {string} query GraphQL query for the repo (including owner and name)
+ * @param {string} authToken personal authorization token
+ * @returns {any[]} the json data for the requested repo as by the graphql query
+ */
+export async function getRepoInfo(query: string, authToken: string): Promise<GitHubInfo | null> {
+  const response: AxiosResponse<{ data: { repository: GitHubInfo } }> = await axios.post(
+    githubApiUrl,
+    {
+      query
+    },
+    {
+      headers: {
+        Authorization: authToken
       }
     }
-  }
+  )
+  return response.data.data.repository
+}
+
+/** Gets a organizations information via GitHub's GraphQL API
+ * @param {string} query GraphQL query for the organization (including owner and name)
+ * @param {string} authToken personal authorization token
+ * @returns {any[]} the json data for the requested organization as by the graphql query; null on error
+ */
+export async function getOrganizationInfo(
+  query: string,
+  authToken: string
+): Promise<GitHubOrganization | null> {
+  const response: AxiosResponse<{ data: { organization: GitHubOrganization } }> = await axios.post(
+    githubApiUrl,
+    {
+      query: query
+    },
+    {
+      headers: {
+        Authorization: authToken
+      }
+    }
+  )
+  return response.data.data.organization
+}
+
+/** Gets a persons information via GitHub's GraphQL API
+ * @param {string} query GraphQL query for the person (including owner and name)
+ * @param {string} authToken personal authorization token
+ * @returns {any[]} the json data for the requested person as by the graphql query; null on error
+ */
+export async function getUserInfo(query: string, authToken: string): Promise<GitHubUser | null> {
+  const response: AxiosResponse<{ data: { user: GitHubUser } }> = await axios.post(
+    githubApiUrl,
+    {
+      query: query
+    },
+    {
+      headers: {
+        Authorization: authToken
+      }
+    }
+  )
+  return response.data.data.user
 }
 
 /**
@@ -38,6 +81,10 @@ type GitHubCommitHistory = {
  * @returns An Array of the project founders
  */
 export async function getRepoFounders(owner: string, name: string): Promise<ProjectFounder[]> {
+  if (!owner || !name) {
+    throw new Error('Not able to fetch repository to get founders of the project')
+  }
+
   const query = `query {
         repository(owner: "${owner}", name: "${name}") {
           defaultBranchRef {
