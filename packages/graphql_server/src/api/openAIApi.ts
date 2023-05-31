@@ -1,3 +1,4 @@
+
 import axios from 'axios'
 import { RequestBodyOpenAI, ResponseBodyOpenAi } from '../../types/openAIApi'
 
@@ -162,4 +163,5 @@ async function categorizeProjectSpecific(readMeOrCategory: string, categoryGener
     console.log('AI request did not work: ', error)
     return null
   }
+
 }
