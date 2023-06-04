@@ -5,9 +5,9 @@ import {
   TwitterProfileResponse
 } from '../../types/twitterScrapingService'
 
-const username = 'typescript2023'
+const username = process.env.SCRAPING_BOT_USER_NAME || ''
 const apiKey = process.env.SCRAPING_BOT_API_KEY || ''
-const apiEndPoint = 'http://api.scraping-bot.io/scrape/data-scraper'
+const apiEndPoint = process.env.SCRAPING_BOT_API_ENDPOINT || ''
 const auth = 'Basic ' + Buffer.from(username + ':' + apiKey).toString('base64')
 
 const SORT_BY_RETWEETS = 'retweets'
