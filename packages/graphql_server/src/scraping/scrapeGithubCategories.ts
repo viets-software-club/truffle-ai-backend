@@ -13,7 +13,7 @@ async function getRepositoryTopics(
   repositoryName: string
 ): Promise<string> {
   const apiUrl = 'https://api.github.com/graphql'
-  const token = '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' //process.env.GITHUB_API_TOKEN
+  const token = process.env.GITHUB_API_TOKEN //process.env.GITHUB_API_TOKEN
 
   const query = `
     query {
@@ -53,5 +53,3 @@ async function getRepositoryTopics(
     throw new Error('Failed to get repository topics.')
   }
 }
-
-void getRepositoryTopics('TransformerOptimus', 'SuperAGI')
