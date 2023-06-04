@@ -6,8 +6,6 @@ export type OpenAIResponse = {
   }[]
 }
 
-
-
 export type RequestBodyOpenAI = {
   model: string
   messages: {

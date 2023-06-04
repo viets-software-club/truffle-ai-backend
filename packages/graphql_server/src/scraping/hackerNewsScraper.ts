@@ -1,12 +1,12 @@
 import axios from 'axios'
-import { openAIRequestHackernews } from './chatGTPMethods'
+import { openAIRequestHackernews } from '../../types/openAIApi'
 import {
   HackerNewsStoriesResponse,
   HackerNewsStoriesResponseHitsArray,
   HackerNewsStoriesResponseHit,
   GetHackerNewsCommentsResponseHits,
   GetHackerNewsCommentsResponseHitArray
-} from '../'
+} from '../../types/hackerNews'
 
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
@@ -38,7 +38,7 @@ async function searchHackerNewsStories(name: string) {
         }
       }
     }
-    return openAIRequestHackernews(allComments.join(' '))
+    return allComments.join(' ')
   } catch (error) {
     console.log('Error fetching HTML code:', error)
   }

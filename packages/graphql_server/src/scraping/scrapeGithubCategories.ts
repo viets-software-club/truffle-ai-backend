@@ -1,5 +1,5 @@
-import axios from 'axios'
-import { categorizeProjectGeneral } from '../api/openAIApi'
+import axios, { AxiosResponse } from 'axios'
+import { RepositoryTopicsResponse } from '../../types/githubApi'
 
 /**
  * Retrieves the repository topics from GitHub API for the specified repository.
@@ -8,10 +8,12 @@ import { categorizeProjectGeneral } from '../api/openAIApi'
  * @returns A Promise that resolves to a string representing the repository topics.
  * @throws Error if the repository topics cannot be retrieved.
  */
-
-async function getRepositoryTopics(repositoryOwner: string, repositoryName: string) {
+async function getRepositoryTopics(
+  repositoryOwner: string,
+  repositoryName: string
+): Promise<string> {
   const apiUrl = 'https://api.github.com/graphql'
-  const token = process.env.GITHUB_API_TOKEN
+  const token = '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' //process.env.GITHUB_API_TOKEN
 
   const query = `
     query {
@@ -32,13 +34,16 @@ async function getRepositoryTopics(repositoryOwner: string, repositoryName: stri
   }
 
   try {
-    const response = await axios.post(apiUrl, { query }, { headers })
-    const data = response?.data?.data?.repository //here I still need the correct type!!!
+    const response: AxiosResponse<RepositoryTopicsResponse> = await axios.post(
+      apiUrl,
+      { query },
+      { headers }
+    )
+    const data = response?.data?.data?.repository
     if (data.repositoryTopics.nodes.length > 0) {
       const topics: string[] = data.repositoryTopics.nodes.map(
         (node: { topic: { name: string } }) => node.topic.name
       )
-      console.log(topics.join(', '))
       return topics.join(' ') //return the openai response as a string
     } else {
       throw new Error('No repository topics found.')
@@ -48,3 +53,5 @@ async function getRepositoryTopics(repositoryOwner: string, repositoryName: stri
     throw new Error('Failed to get repository topics.')
   }
 }
+
+void getRepositoryTopics('TransformerOptimus', 'SuperAGI')

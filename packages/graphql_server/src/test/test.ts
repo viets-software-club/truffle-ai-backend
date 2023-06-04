@@ -52,7 +52,7 @@ async function main(timeMode: timeMode) {
 
     if (readme != null) {
       // call openai api
-      console.log(await eli5.getELI5DescriptionForRepositoryFromText(readme, OPENAI_API_KEY))
+      console.log(await eli5.getELI5FromReadMe(readme))
     }
 
     // get the star history of the repo

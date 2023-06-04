@@ -1,7 +1,6 @@
-
 import axios from 'axios'
 import { RequestBodyOpenAI, ResponseBodyOpenAi } from '../../types/openAIApi'
-
+export { getELI5FromReadMe }
 const model = 'gpt-3.5-turbo'
 const postURL = 'https://api.openai.com/v1/chat/completions'
 const errorMessage =
@@ -16,7 +15,7 @@ async function getELI5FromReadMe(readMe: string) {
   const questionEli5 =
     'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 80 words and do not get too technical'
 
-  const requestBodyEli5 = {
+  const requestBodyEli5: RequestBodyOpenAI = {
     model: model,
     messages: [
       {
@@ -50,7 +49,7 @@ async function getHackernewsSentiment(comments: string) {
   const questionHackernews =
     'The following comments are discussing a new software project. Please get general sentiment regarding the project and use a percentage on whether people like it or not. Please stay around 50 words'
 
-  const requestBodyHackernews = {
+  const requestBodyHackernews: RequestBodyOpenAI = {
     model: model,
     messages: [
       {
@@ -133,7 +132,7 @@ async function categorizeProjectSpecific(readMeOrCategory: string, categoryGener
       return null
   }
 
-  const requestBodyCategories = {
+  const requestBodyCategories: RequestBodyOpenAI = {
     model: model,
     messages: [
       {
@@ -163,5 +162,4 @@ async function categorizeProjectSpecific(readMeOrCategory: string, categoryGener
     console.log('AI request did not work: ', error)
     return null
   }
-
 }
