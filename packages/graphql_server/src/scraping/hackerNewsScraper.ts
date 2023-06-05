@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { openAIRequestHackernews } from '../../types/openAIApi'
 import {
   HackerNewsStoriesResponse,
   HackerNewsStoriesResponseHitsArray,
