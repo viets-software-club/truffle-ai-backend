@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 import {
   HackerNewsStoriesResponse,
   HackerNewsStoriesResponseHitsArray,
@@ -15,7 +16,6 @@ import {
  */
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
-  console.log(url)
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
 
   try {
