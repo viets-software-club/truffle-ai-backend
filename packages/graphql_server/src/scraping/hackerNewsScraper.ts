@@ -1,5 +1,5 @@
 import axios from 'axios'
-//import { openAIRequestHackernews } from '../api/openAIApi'
+
 import {
   HackerNewsStoriesResponse,
   HackerNewsStoriesResponseHitsArray,
@@ -14,7 +14,6 @@ import {
  * @param name - The search query to find Hacker News stories.
  * @returns A promise that resolves to the OpenAI request.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
@@ -82,3 +81,12 @@ function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
   const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
   return timeDiff > twoMonthsInMillis
 }
+
+/**
+ * Entry point of the program. /Test main method
+ */
+function main(): void {
+  void searchHackerNewsStories('e2b')
+}
+
+main()
