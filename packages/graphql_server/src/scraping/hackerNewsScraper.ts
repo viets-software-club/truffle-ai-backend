@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { openAIRequestHackernews } from '../../types/openAIApi'
+//import { openAIRequestHackernews } from '../api/openAIApi'
 import {
   HackerNewsStoriesResponse,
   HackerNewsStoriesResponseHitsArray,
@@ -17,7 +17,6 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
-  console.log(url)
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
 
   try {
