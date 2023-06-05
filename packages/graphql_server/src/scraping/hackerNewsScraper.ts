@@ -82,11 +82,3 @@ function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
   return timeDiff > twoMonthsInMillis
 }
 
-/**
- * Entry point of the program. /Test main method
- */
-function main(): void {
-  void searchHackerNewsStories('e2b')
-}
-
-main()
