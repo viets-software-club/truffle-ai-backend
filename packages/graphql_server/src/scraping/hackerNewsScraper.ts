@@ -12,24 +12,25 @@ import {
  * Search Hacker News stories based on the given name, retrieve comments,
  * and generate an OpenAI request.
  * @param name - The search query to find Hacker News stories.
- * @returns A promise that resolves to the OpenAI request.
+ * @returns the comments and the links to the posts. please receive in this format: let [comments, links] = searchHackerNewsStories("companyname")
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
-
+  const linksOfPosts: string[] = []
   try {
     const response = await axios.get(url)
     const formattedJson = response.data as HackerNewsStoriesResponse
     const hitslist: HackerNewsStoriesResponseHitsArray = formattedJson.hits
-
     for (let i = 0; i < hitslist.length; i++) {
       const hit: HackerNewsStoriesResponseHit = hitslist[i]
       const createdAt: string = hit?.created_at
       const objectId: string = hit?.objectID
-
+      console.log(i, createdAt)
       if (!isMoreThanMonthsTwoAgo(createdAt)) {
         const comments: string[] | undefined = await getHackerNewsCommentsByPostId(objectId)
+        linksOfPosts.push(`https://news.ycombinator.com/item?id=${objectId}`)
         if (comments) {
           for (let j = 0; j < comments.length; j++) {
             allComments.push(comments[j])
@@ -37,7 +38,7 @@ async function searchHackerNewsStories(name: string) {
         }
       }
     }
-    return allComments.join(' ')
+    return [allComments.join(' '), linksOfPosts.join('\n')] //Response needs to be received like this
   } catch (error) {
     console.log('Error fetching HTML code:', error)
   }
