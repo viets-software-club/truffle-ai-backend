@@ -45,6 +45,7 @@ async function getELI5FromReadMe(readMe: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getHackernewsSentiment(comments: string) {
   const questionHackernews =
     'The following comments are discussing a new software project. Please get general sentiment regarding the project and use a percentage on whether people like it or not. Please stay around 50 words'
@@ -78,6 +79,7 @@ async function getHackernewsSentiment(comments: string) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function categorizeProjectSpecific(readMeOrCategory: string, categoryGeneral: number) {
   const listOfCategoriesDeveloperTools: string[] = [
     'Code Editors',

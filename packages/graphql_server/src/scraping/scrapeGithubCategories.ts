@@ -8,6 +8,7 @@ import { RepositoryTopicsResponse } from '../../types/githubApi'
  * @returns A Promise that resolves to a string representing the repository topics.
  * @throws Error if the repository topics cannot be retrieved.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getRepositoryTopics(
   repositoryOwner: string,
   repositoryName: string

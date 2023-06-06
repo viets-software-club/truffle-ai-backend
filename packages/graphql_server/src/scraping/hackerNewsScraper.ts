@@ -81,4 +81,3 @@ function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
   const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
   return timeDiff > twoMonthsInMillis
 }
-
