@@ -110,7 +110,7 @@ export async function fetchTrendingDevelopers(timeMode: timeMode) {
  * @throws Error if the repository topics cannot be retrieved.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getRepositoryTopics(
+export async function getRepositoryTopics(
   repositoryOwner: string,
   repositoryName: string
 ): Promise<string> {

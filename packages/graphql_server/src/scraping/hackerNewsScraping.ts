@@ -8,6 +8,8 @@ import {
   GetHackerNewsCommentsResponseHitArray
 } from '../../types/hackerNewsScraper'
 
+export { searchHackerNewsStories }
+
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
  * and generate an OpenAI request.
@@ -27,7 +29,6 @@ async function searchHackerNewsStories(name: string) {
       const hit: HackerNewsStoriesResponseHit = hitslist[i]
       const createdAt: string = hit?.created_at
       const objectId: string = hit?.objectID
-      console.log(i, createdAt)
       if (!isMoreThanMonthsTwoAgo(createdAt)) {
         const comments: string[] | undefined = await getHackerNewsCommentsByPostId(objectId)
         linksOfPosts.push(`https://news.ycombinator.com/item?id=${objectId}`)
@@ -38,6 +39,7 @@ async function searchHackerNewsStories(name: string) {
         }
       }
     }
+    console.log(allComments.join(' '))
     return [allComments.join(' '), linksOfPosts.join('\n')] //Response needs to be received like this
   } catch (error) {
     console.log('Error fetching HTML code:', error)
@@ -63,7 +65,6 @@ async function getHackerNewsCommentsByPostId(story_id: string) {
       comments.push(data[i]?.comment_text)
     }
 
-    console.log(`For story_id ${story_id}, so viele Kommentare gefunden: ${comments.length}`)
     return comments
   } catch (error) {
     console.log('Error fetching data:', error)

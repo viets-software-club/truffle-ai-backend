@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { RequestBodyOpenAI, ResponseBodyOpenAi } from '../../types/openAIApi'
 
-export { getELI5FromReadMe }
+export { getELI5FromReadMe, getHackernewsSentiment, categorizeProjectGeneral }
 
 const model = 'gpt-3.5-turbo'
 const openAIapiUrl = 'https://api.openai.com/v1/chat/completions'
@@ -19,6 +19,7 @@ const headers = {
  * @param readMe - The content of the project's README.
  * @returns The ELI5 summary of the project.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getELI5FromReadMe(readMe: string) {
   const questionEli5 = //this is the question send to openAI
     'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 80 words and do not get too technical'
@@ -58,6 +59,7 @@ async function getELI5FromReadMe(readMe: string) {
  * @param comments - The comments discussing the project.Scraped from Hackernews
  * @returns The general sentiment about the project including a percentage.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getHackernewsSentiment(comments: string) {
   const questionHackernews = //this is the question send to openAI
     'The following comments are discussing a new software project. Please get general sentiment regarding the project and use a percentage on whether people like it or not. Please stay around 50 words'
@@ -97,6 +99,7 @@ async function getHackernewsSentiment(comments: string) {
  * @param categoryGeneral - The general category of the project (1 for developer tools, 2 for infrastructure, 3 for ML/AI).
  * @returns The two best-fitting specific categories for the project.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function categorizeProjectSpecific(
   readMeOrCategory: string,
   readme: string,
@@ -154,6 +157,7 @@ async function categorizeProjectSpecific(
     case 4: //if chatgtp says the categories are not specific enough we need t use the readme file to put it into two of the categories
       categoriesSpecific = listOfCategoriesDeveloperTools.concat(listOfCategoriesInfrastructure)
       categoriesSpecific = categoriesSpecific.concat(listOfCategoriesMLAI)
+      break
     default:
       console.log('Invalid categoryGeneral value')
       return null
@@ -196,6 +200,7 @@ async function categorizeProjectSpecific(
  * @param readMeOrCategory - The project's README or category.
  * @returns The two best-fitting specific categories for the project, based on the general category.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function categorizeProjectGeneral(categories: string, readme: string) {
   const questionCategoriesGeneral =
     'These 3 categroies should be used to categorize a software engineering project. 1 for developer tools, 2 for Infrastructure, 3 for Machine Learning and Artifical Inteligence. Apart from the number do not respond with anything): '

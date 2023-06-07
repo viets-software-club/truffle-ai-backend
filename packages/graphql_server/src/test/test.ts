@@ -15,6 +15,7 @@ async function main(timeMode: timeMode) {
   // your personal GitHub authToken
   const authToken: string = process.env.GITHUB_API_TOKEN
   // your personal OpenAI API Key
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const OPENAI_API_KEY: string = process.env.OPENAI_API_KEY
 
   // check if any repos were actually found
