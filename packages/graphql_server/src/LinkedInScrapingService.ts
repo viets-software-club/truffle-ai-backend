@@ -1,72 +1,9 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import dotenv from 'dotenv'
+import { LinkedInCompanyProfile, CompanyDataResponse } from '../types/linkedInScraping'
 
-dotenv.config()
-
-type LinkedInCompanyProfile = {
-  name: string
-  founded: string
-  sphere: string
-  followers: number
-  employeesAmountInLinkedin: string
-  about: string
-  website: string
-  crunchbaseUrl: string
-  industries: string
-  hqLocation: string
-  specialties: string
-}
-
-type CompanyDataResponse = {
-  url: string
-  name: string
-  founded: string
-  sphere: string
-  followers: number
-  logo: string
-  image: string
-  employeesAmountInLinkedin: string
-  about: string
-  website: string
-  locations: string[]
-  employees: {
-    img: string
-    title: string
-    subtitle: string
-  }[]
-  updates: {
-    time: string
-    text: string
-    likes_count: number
-    comments_count: number
-  }[]
-  show_more: string[]
-  affiliated: {
-    title: string
-    subtitle: string
-    location: string
-    Links: string
-  }[]
-  browse_jobs: string[]
-  company_id: string
-  timestamp: string
-  slogan: string
-  crunchbase_url: string
-  stock_info: string
-  funding: string
-  investors: string
-  similarPages: string[]
-  Website: string
-  Industries: string
-  'Company size': string
-  Headquarters: string
-  Type: string
-  Specialties: string
-} | null
-
-const username = 'typescript2023'
+const username = process.env.SCRAPING_BOT_USER_NAME || ''
 const apiKey = process.env.SCRAPING_BOT_API_KEY || ''
-const apiEndPoint = 'http://api.scraping-bot.io/scrape/data-scraper'
+const apiEndPoint = process.env.SCRAPING_BOT_API_ENDPOINT || ''
 const auth = 'Basic ' + Buffer.from(username + ':' + apiKey).toString('base64')
 
 function sleep(ms: number): Promise<void> {
