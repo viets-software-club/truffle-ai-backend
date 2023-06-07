@@ -6,7 +6,7 @@ import {
   HackerNewsStoriesResponseHit,
   GetHackerNewsCommentsResponseHits,
   GetHackerNewsCommentsResponseHitArray
-} from '../../types/hackerNewsScraper'
+} from '../../types/hackerNewsScraping'
 
 export { searchHackerNewsStories }
 
