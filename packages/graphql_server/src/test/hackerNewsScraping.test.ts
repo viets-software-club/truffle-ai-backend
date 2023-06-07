@@ -1,6 +1,7 @@
 import { searchHackerNewsStories } from '../scraping/hackerNewsScraping'
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function testHackerNewsScraping() {
+async function testHackerNewsScraping(repoName: string) {
   //returns the comments
-  console.log(searchHackerNewsStories('SuperAGI'))
+  console.log(await searchHackerNewsStories(repoName))
 }

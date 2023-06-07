@@ -2,6 +2,7 @@ import { timeMode } from '../../types/githubScraping'
 import * as github from '../api/githubApi'
 import * as eli5 from '../api/openAIApi'
 import * as starHistory from '../starHistory/starHistory'
+import * as hackernews from '../scraping/hackerNewsScraping'
 
 /** Main function to test the functionality of the different methods
  * and how to correctly call them and what the intended workflow is about
@@ -12,10 +13,10 @@ async function main(timeMode: timeMode) {
   const trendingSplit: string[] | undefined = await github.fetchTrendingRepos(timeMode)
 
   // your personal GitHub authToken
-  const authToken: string = process.env.GITHUB_API_TOKEN
+  const authToken: string = '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' //process.env.GITHUB_API_TOKEN
   // your personal OpenAI API Key
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const OPENAI_API_KEY: string = process.env.OPENAI_API_KEY
+  const OPENAI_API_KEY: string = 'sk - zl68qSX7NpVJ4HZlsJt4T3BlbkFJaCdGia3cjbdxOZi7g4zV' //process.env.OPENAI_API_KEY
 
   // check if any repos were actually found
   if (!trendingSplit) {
@@ -52,9 +53,19 @@ async function main(timeMode: timeMode) {
 
     if (readme != null) {
       // call openai api
-      console.log(await eli5.getELI5FromReadMe(readme))
+      console.log('Eli5:')
+      console.log(await eli5.getELI5FromReadMe(readme)) //prints summarised readme
+      const categories = await github.getRepositoryTopics(owner, readme)
+      console.log('Categories:')
+      console.log(eli5.categorizeProjectGeneral(categories, readme))
     }
+    console.log('hackernewsstories:')
+    const [comments, links] = await hackernews.searchHackerNewsStories(name)
+    //hiermit noch die eli5 method aufrufen und checken ob der String leer ist. 
+    console.log(await)
 
+    if (links == ' ' && comments == ' ') {
+    }
     // get the star history of the repo
     console.log(await starHistory.getRepoStarRecords(owner + '/' + name, authToken, 10))
 

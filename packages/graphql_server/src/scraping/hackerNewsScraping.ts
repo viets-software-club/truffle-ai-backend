@@ -39,8 +39,11 @@ async function searchHackerNewsStories(name: string) {
         }
       }
     }
-    console.log(allComments.join(' '))
-    return [allComments.join(' '), linksOfPosts.join('\n')] //Response needs to be received like this
+    if (allComments.length != 0) {
+      return [allComments.join(' '), linksOfPosts.join('\n')] //Response needs to be received like this
+    } else {
+      return [' ', ' ']
+    }
   } catch (error) {
     console.log('Error fetching HTML code:', error)
   }
