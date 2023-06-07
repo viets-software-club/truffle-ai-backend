@@ -9,8 +9,7 @@ import {
   ProjectFounder
 } from '../../types/githubApi'
 
-const githubApiUrl = 'https://api.github.com/graphql'
-
+const githubApiUrl = process.env.GITHUB_API_URL || ''
 /** Gets the repo's information via GitHub's GraphQL API
  * @param {string} query GraphQL query for the repo (including owner and name)
  * @param {string} authToken personal authorization token
@@ -190,16 +189,20 @@ export async function getRepoFounders(owner: string, name: string): Promise<Proj
   const distinctCommiters: ProjectFounder[] = []
 
   // checks, whether a login name appears twice and only pushes distinct founders into the array
-  response.data.data.repository.defaultBranchRef.target.history.edges.forEach((node) => {
-    const loginName = node.node.author.user.login
-    if (!distinctCommiters.find((c) => c.login === loginName)) {
-      distinctCommiters.push({
-        name: node.node.author.user.name ?? '',
-        login: node.node.author.user.login ?? '',
-        twitterUsername: node.node.author.user.twitterUsername ?? ''
-      })
-    }
-  })
+  if (response?.data?.data?.repository?.defaultBranchRef?.target?.history?.edges) {
+    response.data.data.repository.defaultBranchRef.target.history.edges.forEach((node) => {
+      const loginName = node.node.author.user.login
+      if (!distinctCommiters.find((c) => c.login === loginName)) {
+        distinctCommiters.push({
+          name: node.node.author.user.name ?? '',
+          login: node.node.author.user.login ?? '',
+          twitterUsername: node.node.author.user.twitterUsername ?? ''
+        })
+      }
+    })
+  } else {
+    throw new Error(`No edges found in the commit history of the following repo: ${name}`)
+  }
 
   return distinctCommiters
 }
