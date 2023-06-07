@@ -241,6 +241,7 @@ export async function fetchTrendingDevelopers(timeMode: timeMode) {
  * @param repositoryName - The name of the repository.
  * @returns A Promise that resolves to a string representing the repository topics.
  * @throws Error if the repository topics cannot be retrieved.
+ * //returns topics defined by the founder
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getRepositoryTopics(
