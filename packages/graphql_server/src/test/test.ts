@@ -1,5 +1,4 @@
 import { timeMode } from '../../types/githubScraping'
-import * as scrape from '../scraping/githubScraping'
 import * as github from '../api/githubApi'
 import * as eli5 from '../api/openAIApi'
 import * as starHistory from '../starHistory/starHistory'
@@ -10,7 +9,7 @@ import * as starHistory from '../starHistory/starHistory'
  * @param {string} timeMode - should be 'daily', 'weekly' or 'monthly' => defines the scope of which repos and developers the methods looks at
  */
 async function main(timeMode: timeMode) {
-  const trendingSplit: string[] | undefined = await scrape.fetchTrendingRepos(timeMode)
+  const trendingSplit: string[] | undefined = await github.fetchTrendingRepos(timeMode)
 
   // your personal GitHub authToken
   const authToken: string = process.env.GITHUB_API_TOKEN
@@ -49,7 +48,7 @@ async function main(timeMode: timeMode) {
 
     // TODO check if the repo has more than a 1k stars: repoInfo.stargazers.totalCount < 1000
 
-    const readme: string = await scrape.fetchRepositoryReadme(owner, name)
+    const readme: string = await github.fetchRepositoryReadme(owner, name)
 
     if (readme != null) {
       // call openai api
