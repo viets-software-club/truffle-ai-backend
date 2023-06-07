@@ -4,12 +4,12 @@ import {
   GitHubUser,
   GitHubInfo,
   Edge,
-  ContributorResponse
+  ContributorResponse,
+  RepositoryTopicsResponse
 } from '../../types/githubApi'
 import * as cheerio from 'cheerio'
 import * as showdown from 'showdown'
 import { Developer, DeveloperRepo, timeMode } from '../../types/githubScraping'
-import { RepositoryTopicsResponse } from '../../types/githubApi'
 
 const githubApiUrl = 'https://api.github.com/graphql'
 

@@ -1,4 +1,4 @@
-import { fetchTrendingRepos } from './scraping/githubScraping'
+import { fetchTrendingRepos } from './api/githubApi'
 import { insertProject, updateProjectTrendingState, updateProject } from './processRepo'
 import supabase from './supabase'
 import { TrendingState } from '../types/processRepo'

@@ -3,7 +3,7 @@ import {
   getHackernewsSentiment,
   categorizeProjectGeneral
 } from '../api/openAIApi'
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testgetEli5FromREadMe() {
   //get readme from githubscraping method in real application
   const readMe = `
@@ -11,7 +11,7 @@ function testgetEli5FromREadMe() {
     `
   console.log(getELI5FromReadMe(readMe))
 }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testHackerNewsSentiment() {
   //get real comments from method in hackerNewsScraper. E.g. searchHackerNewsStories('SuperAGI')
 
@@ -19,7 +19,7 @@ function testHackerNewsSentiment() {
     '&gt; What do you think?<p>Universal basic incoom. This is what I argue in my post on AI&#x27;s impact on programming jobs -- my take is that if AI ends up automating low end tasks, then it opens up opportunities for us to spend our time on more creative and challenging problems. The current generation of models know all the data structures and algorithms but do they have the ability to extrapolate their knowledge to come up with novel solutions to unseen problems -- which is what we are good at. Similarly, there are tons of interesting problems which are unsolved in other domains and we could use AI&#x27;s help to tackle those. Naval Ravikant talks about something similar on Joe Rogan Podcast -- where he says everybody can be rich. His argument was that if every human on the planet could become an engineer, or doctor, or scientist, we would solve all of our basic problems in few years and then humanity would be free to explore creative things. So if AI gets us there, we could be writers, actors, scientists.<p><a href='
   console.log(getHackernewsSentiment(comments))
 }
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function testCategorizeProject() {
   //get realcomments using githubscraping
   const readMe = `
