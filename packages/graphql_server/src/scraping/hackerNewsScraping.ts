@@ -6,7 +6,7 @@ import {
   HackerNewsStoriesResponseHit,
   GetHackerNewsCommentsResponseHits,
   GetHackerNewsCommentsResponseHitArray
-} from '../../types/hackerNews'
+} from '../../types/hackerNewsScraper'
 
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
