@@ -244,7 +244,7 @@ export async function fetchTrendingDevelopers(timeMode: timeMode) {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getRepositoryTopics(
-  repositoryOwner: string,
+  repositoryOwner: string, //these need to be passed as parameters
   repositoryName: string
 ): Promise<string> {
   const apiUrl = 'https://api.github.com/graphql'
