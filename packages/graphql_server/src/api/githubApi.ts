@@ -195,7 +195,8 @@ export async function fetchRepositoryReadme(owner: string, name: string) {
       continue
     }
   }
-  throw new Error("ReadMe couldn't be found")
+  console.log("ReadMe couldn't be found")
+  return 'This readme file did not exist. So please just return an emtpy string'
 }
 
 /** Get trending developers (and their trending repos) from the github page
@@ -246,10 +247,11 @@ export async function fetchTrendingDevelopers(timeMode: timeMode) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getRepositoryTopics(
   repositoryOwner: string, //these need to be passed as parameter
-  repositoryName: string
-): Promise<string> {
+  repositoryName: string,
+  tokenGithub: string
+) {
   const apiUrl = 'https://api.github.com/graphql'
-  const token = process.env.GITHUB_API_TOKEN //process.env.GITHUB_API_TOKEN
+  // const token = process.env.GITHUB_API_TOKEN
 
   const query = `
     query {
@@ -266,7 +268,7 @@ export async function getRepositoryTopics(
   `
 
   const headers = {
-    Authorization: `Bearer ${token}`
+    Authorization: `Bearer ${tokenGithub}`
   }
 
   try {
@@ -286,6 +288,6 @@ export async function getRepositoryTopics(
     }
   } catch (error) {
     console.log('Could not retrieve the categories')
-    throw new Error('Failed to get repository topics.')
+    return ' '
   }
 }

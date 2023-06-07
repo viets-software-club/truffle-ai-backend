@@ -11,7 +11,7 @@ const errorMessage =
 //The Header for all requests
 const headers = {
   'Content-Type': 'application/json',
-  Authorization: 'Bearer ' + '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' //process.env.OPENAI_API_KEY
+  Authorization: 'Bearer ' + process.env.OPENAI_API_KEY
 }
 
 /**
