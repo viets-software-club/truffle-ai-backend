@@ -62,3 +62,29 @@ export type GitHubCommitHistory = {
     }
   }
 }
+// Edge in the Github Commit History
+export type Edge = {
+  node: {
+    author: {
+      user: {
+        login: string
+      }
+    }
+  }
+}
+
+// structure of the Github Commit History on the main branch of a repo
+export type ContributorResponse = {
+  data: {
+    repository: {
+      defaultBranchRef: {
+        target: {
+          history: {
+            totalCount: number
+            edges: Edge[]
+          }
+        }
+      }
+    }
+  }
+}
