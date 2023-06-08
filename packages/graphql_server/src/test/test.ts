@@ -57,7 +57,7 @@ async function main(timeMode: timeMode) {
     // TODO check if the repo has more than a 1k stars: repoInfo.stargazers.totalCount < 1000
     //tries to find the readme file -> TODO check if owner returns the correct value
     const readme: string = await github.fetchRepositoryReadme(owner, name)
-    console.log(readme)
+    //  console.log(readme)
 
     //sumarrieses the readME but also checks if the readme is not empty
     if (readme == ' ') {
@@ -66,7 +66,9 @@ async function main(timeMode: timeMode) {
       console.log('Eli5:')
       console.log(await eli5.getELI5FromReadMe(readme)) //prints summarised readme if one was found
     }
-    const categories = await github.getRepositoryTopics(owner, readme, authToken)
+    console.log(owner)
+    console.log(name)
+    const categories = await github.getRepositoryTopics(owner, name, authToken)
     //Categorizes the project
     console.log('Categories:\n')
     console.log(await eli5.categorizeProjectGeneral(categories, readme))
@@ -98,4 +100,4 @@ async function main(timeMode: timeMode) {
   // console.log(scrape.fetchTrendingDevelopers(timeMode))
 }
 
-void main('daily')
+void main('monthly')
