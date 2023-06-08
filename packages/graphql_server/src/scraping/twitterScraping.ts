@@ -1,9 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import {
-  TwitterPost,
-  TwitterUser,
-  TwitterProfileResponse
-} from '../../types/twitterScrapingService'
+import { TwitterPost, TwitterUser, TwitterProfileResponse } from '../../types/twitterScraping'
 
 const username = process.env.SCRAPING_BOT_USER_NAME || ''
 const apiKey = process.env.SCRAPING_BOT_API_KEY || ''
@@ -53,16 +49,17 @@ async function getTwitterUserByHandle(twitterHandle: string): Promise<TwitterUse
       const responseUrl = `http://api.scraping-bot.io/scrape/data-scraper-response?scraper=twitterProfile&responseId=${response.data.responseId}`
       const finalDataResponse = await axios.get<TwitterProfileResponse>(responseUrl, requestConfig)
       data = finalDataResponse.data
-    } while (data === null)
+    } while (data === null || (data.data[0].status && data.data[0].status === 'pending'))
 
+    const userData = data.data[0]
     return {
-      profileName: data.profile_name ?? '',
-      isVerified: data.isVerified ?? false,
-      bio: data.bio ?? '',
-      followers: data.following ?? -1,
-      websiteUrl: data.website_url ?? '',
-      handle: data.handle ?? '',
-      postsInfo: data.posts_info ?? []
+      profileName: userData.profile_name ?? '',
+      isVerified: userData.isVerified ?? false,
+      bio: userData.bio ?? '',
+      followers: userData.following ?? -1,
+      websiteUrl: userData.website_url ?? '',
+      handle: userData.handle ?? '',
+      postsInfo: userData.posts_info ?? []
     }
   } catch (error) {
     console.log(error)
