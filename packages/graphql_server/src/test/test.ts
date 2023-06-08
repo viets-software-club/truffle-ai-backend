@@ -59,7 +59,7 @@ async function main(timeMode: timeMode) {
     const readme: string = await github.fetchRepositoryReadme(owner, name)
     console.log(readme)
 
-    //sumarrieses the readME
+    //sumarrieses the readME but also checks if the readme is not empty
     if (readme == ' ') {
       console.log('Can not summarise project as no ReadMefile was found')
     } else {
