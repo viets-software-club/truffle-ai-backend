@@ -69,7 +69,8 @@ async function main(timeMode: timeMode) {
     const categories = await github.getRepositoryTopics(owner, readme, authToken)
     //Categorizes the project
     console.log('Categories:\n')
-    console.log((await eli5.categorizeProjectGeneral(categories, readme)) + '\n')
+    console.log(await eli5.categorizeProjectGeneral(categories, readme))
+    console.log('\n')
     console.log('hackernewsstories:\n')
 
     //receives the scraped hackernews
@@ -81,7 +82,8 @@ async function main(timeMode: timeMode) {
       } else {
         //summs them up for the sentiment
         console.log('sentiment and links:\n')
-        console.log((await eli5.getHackernewsSentiment(commentsAndLinks[0])) + '\n')
+        console.log(await eli5.getHackernewsSentiment(commentsAndLinks[0]))
+        console.log('\n')
         console.log(commentsAndLinks[1])
       }
     }
