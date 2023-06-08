@@ -196,7 +196,7 @@ export async function fetchRepositoryReadme(owner: string, name: string) {
     }
   }
   console.log("ReadMe couldn't be found")
-  return 'This readme file did not exist. So please just return an emtpy string'
+  return ' '
 }
 
 /** Get trending developers (and their trending repos) from the github page

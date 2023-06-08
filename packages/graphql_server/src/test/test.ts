@@ -51,35 +51,37 @@ async function main(timeMode: timeMode) {
         }
       }`
 
-    //scrapes the repo info
-    console.log('in loop')
+    console.log('-------------------------------------------------------')
     console.log(await github.getRepoInfo(query, 'Bearer ' + authToken))
 
     // TODO check if the repo has more than a 1k stars: repoInfo.stargazers.totalCount < 1000
-    //tries to find the readme file
+    //tries to find the readme file -> TODO check if owner returns the correct value
     const readme: string = await github.fetchRepositoryReadme(owner, name)
     console.log(readme)
-    if (readme != null) {
-      // call openai api
-      //sumarrieses the ELI5file
+
+    //sumarrieses the readME
+    if (readme == ' ') {
+      console.log('Can not summarise project as no ReadMefile was found')
+    } else {
       console.log('Eli5:')
-      console.log(await eli5.getELI5FromReadMe(readme)) //prints summarised readme
-      const categories = await github.getRepositoryTopics(owner, readme, authToken)
-      //calls categrzie Project and decides within the method wether to use the readme or the category
-      console.log('Categories:')
-      console.log(eli5.categorizeProjectGeneral(categories, readme))
+      console.log(await eli5.getELI5FromReadMe(readme)) //prints summarised readme if one was found
     }
-    console.log('hackernewsstories:')
+    const categories = await github.getRepositoryTopics(owner, readme, authToken)
+    //Categorizes the project
+    console.log('Categories:\n')
+    console.log((await eli5.categorizeProjectGeneral(categories, readme)) + '\n')
+    console.log('hackernewsstories:\n')
 
     //receives the scraped hackernews
     const commentsAndLinks: string[] | undefined = await hackernews.searchHackerNewsStories(name)
-    if (commentsAndLinks !== undefined) {
+
+    if (commentsAndLinks != undefined) {
       if (commentsAndLinks[0] == ' ' && commentsAndLinks[1] == ' ') {
         console.log('no comments were found')
       } else {
         //summs them up for the sentiment
-        console.log('sentiment and links')
-        console.log(await eli5.getHackernewsSentiment(commentsAndLinks[0]))
+        console.log('sentiment and links:\n')
+        console.log((await eli5.getHackernewsSentiment(commentsAndLinks[0])) + '\n')
         console.log(commentsAndLinks[1])
       }
     }

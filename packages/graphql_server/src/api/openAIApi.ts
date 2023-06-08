@@ -49,7 +49,7 @@ async function getELI5FromReadMe(readMe: string) {
       return content
     }
   } catch (error) {
-    console.log(error)
+    console.log('there was an error with the Eli5. Probably the ReadMe file ')
     return null
   }
 }
@@ -100,11 +100,7 @@ async function getHackernewsSentiment(comments: string) {
  * @returns The two best-fitting specific categories for the project.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function categorizeProjectSpecific(
-  readMeOrCategory: string,
-  readme: string,
-  categoryGeneral: number
-) {
+async function categorizeProjectSpecific(readMeOrCategory: string, categoryGeneral: number) {
   //The following 3 variables are the lists of categories used to define the project
   const listOfCategoriesDeveloperTools: string[] = [
     'Code Editors',
@@ -235,9 +231,9 @@ async function categorizeProjectGeneral(categories: string, readme: string) {
       const content: string = data?.choices[0]?.message?.content
       const num = parseInt(content)
       if (num !== 1 && num !== 2 && num !== 3) {
-        return categorizeProjectSpecific(categories, readme, 4)
+        return categorizeProjectSpecific(readme, 4)
       } else {
-        return categorizeProjectSpecific(categories, readme, num)
+        return categorizeProjectSpecific(categories, num)
       }
     }
   } catch (error) {
