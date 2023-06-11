@@ -110,4 +110,14 @@ async function getMostPopularTweetsByUser(
   )
 }
 
-export default { getMostPopularTweetsByUser, getTwitterUserByHandle }
+/**
+ * Retrieves the Twitter bio of a user based on their Twitter handle.
+ * @param twitterHandle The Twitter handle of the user.
+ * @returns A Promise that resolves to a string representing the Twitter bio of the user.
+ */
+async function getTwitterBioByHandle(twitterHandle: string): Promise<string> {
+  const twitterUser = await getTwitterUserByHandle(twitterHandle)
+  return twitterUser.bio
+}
+
+export default { getMostPopularTweetsByUser, getTwitterUserByHandle, getTwitterBioByHandle }
