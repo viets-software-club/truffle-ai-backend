@@ -25,6 +25,7 @@ export type TwitterPost = {
   retweetCount: number
   likeCount: number
   replies: number
+  url: string
 }
 
 export type TwitterProfileResponse = {

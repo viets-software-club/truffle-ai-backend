@@ -103,7 +103,8 @@ async function getMostPopularTweetsByUser(
           text: tweet.text,
           retweetCount: tweet.retweets,
           likeCount: tweet.likes,
-          replies: tweet.replies
+          replies: tweet.replies,
+          url: tweet.post_url
         }
       })
   )
