@@ -44,6 +44,7 @@ async function getTwitterUserByHandle(twitterHandle: string): Promise<TwitterUse
     let data: TwitterProfileResponse | null = null
 
     // sends the request until finalData is received
+    // Waits for 5 seconds, because scraping bot API has built-in mechanism to avoid blocking us as scrapers
     do {
       await sleep(5000)
       const responseUrl = `http://api.scraping-bot.io/scrape/data-scraper-response?scraper=twitterProfile&responseId=${response.data.responseId}`
