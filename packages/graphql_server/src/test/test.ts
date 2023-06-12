@@ -3,6 +3,8 @@ import * as scrape from '../scraping/githubScraping'
 import * as github from '../api/githubApi'
 import * as eli5 from '../api/openAIApi'
 import * as starHistory from '../starHistory/starHistory'
+import * as forkHistory from '../starHistory/forkHistory'
+import * as issueHistory from '../starHistory/issueHistory'
 
 /** Main function to test the functionality of the different methods
  * and how to correctly call them and what the intended workflow is about
@@ -57,6 +59,12 @@ async function main(timeMode: timeMode) {
 
     // get the star history of the repo
     console.log(await starHistory.getRepoStarRecords(owner + '/' + name, authToken, 10))
+
+    // get the fork history of the repo
+    console.log(await forkHistory.getRepoForkRecords(owner + '/' + name, authToken, 10))
+
+    // get the issue history of the repo
+    console.log(await issueHistory.getRepoIssueRecords(owner + '/' + name, authToken, 10))
 
     // get the contributor count of the repo
     console.log(await github.getContributorCount(owner, name, authToken))
