@@ -1,5 +1,6 @@
 import { timeMode } from '../../types/githubScraping'
 import * as github from '../api/githubApi'
+import * as githubScraping from '../scraping/githubScraping'
 import * as eli5 from '../api/openAIApi'
 import * as starHistory from '../starHistory/starHistory'
 import * as hackernews from '../scraping/hackerNewsScraping'
@@ -16,8 +17,8 @@ import * as hackernews from '../scraping/hackerNewsScraping'
  * You need to add the process.env.OPenai_API_KEY because it needs to be used
  *
  */
-async function main(timeMode: timeMode) {
-  const trendingSplit: string[] | undefined = await github.fetchTrendingRepos(timeMode)
+export async function main(timeMode: timeMode, firstNRepos: number) {
+  const trendingSplit: string[] | undefined = await githubScraping.fetchTrendingRepos(timeMode)
   // your personal GitHub authToken
   const authToken: string = process.env.GITHUB_API_TOKEN
   // your personal OpenAI API Key
@@ -30,7 +31,9 @@ async function main(timeMode: timeMode) {
     process.exit()
   }
 
-  for (let i = 0; i < trendingSplit.length / 2; i++) {
+  trendingSplit.length / 2 < firstNRepos ? (firstNRepos = trendingSplit.length / 2) : null
+
+  for (let i = 0; i < firstNRepos; i++) {
     const owner = trendingSplit[2 * i]
     const name = trendingSplit[2 * i + 1]
     const query = `query {
@@ -56,7 +59,7 @@ async function main(timeMode: timeMode) {
 
     // TODO check if the repo has more than a 1k stars: repoInfo.stargazers.totalCount < 1000
     //tries to find the readme file -> TODO check if owner returns the correct value
-    const readme: string = await github.fetchRepositoryReadme(owner, name)
+    const readme: string = await githubScraping.fetchRepositoryReadme(owner, name)
     //  console.log(readme)
 
     //sumarrieses the readME but also checks if the readme is not empty
@@ -100,4 +103,4 @@ async function main(timeMode: timeMode) {
   // console.log(scrape.fetchTrendingDevelopers(timeMode))
 }
 
-void main('monthly')
+//void main('monthly', 30)

@@ -10,7 +10,7 @@ import { GitHubInfo } from '../types/githubApi'
 import { getRepoStarRecords } from './starHistory/starHistory'
 import { StarRecord } from '../types/starHistory'
 import { TrendingState } from '../types/processRepo'
-import { fetchRepositoryReadme } from './api/githubApi'
+import { fetchRepositoryReadme } from './scraping/githubScraping'
 import { getELI5FromReadMe } from './api/openAIApi'
 import { repoIsAlreadyInDB } from './dbUpdater'
 
