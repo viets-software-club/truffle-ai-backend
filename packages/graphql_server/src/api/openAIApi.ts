@@ -45,7 +45,6 @@ async function getELI5FromReadMe(readMe: string) {
       return null
     } else {
       const content: string = data.choices[0].message.content
-      console.log(content)
       return content
     }
   } catch (error) {

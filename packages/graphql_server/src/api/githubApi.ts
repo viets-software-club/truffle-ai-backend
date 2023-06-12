@@ -6,8 +6,7 @@ import {
   Edge,
   ContributorResponse,
   GitHubCommitHistory,
-  ProjectFounder
-  ContributorResponse,
+  ProjectFounder,
   RepositoryTopicsResponse
 } from '../../types/githubApi'
 
