@@ -92,6 +92,7 @@ async function getHackernewsSentiment(comments: string) {
   }
 }
 
+//need to change categories
 /**
  * Categorizes a software engineering project based on its README or category.
  * @param readMeOrCategory - The project's README or category.
