@@ -15,7 +15,7 @@ async function getRepoForks(
   token?: string,
   page?: number
 ): Promise<AxiosResponse<ForksData[]>> {
-  let url = `https://api.github.com/repos/${repo}/forks?per_page=${DEFAULT_PER_PAGE}`
+  let url = `https://api.github.com/repos/${repo}/forks?per_page=${DEFAULT_PER_PAGE}&sort=oldest`
 
   if (page !== undefined) {
     url = `${url}&page=${page}`
@@ -100,6 +100,11 @@ async function getRepoForksMap(
   requestPages: number[],
   maxRequestAmount: number
 ) {
+  // add the first page if not already in the array
+  if (!requestPages.includes(1)) {
+    requestPages.unshift(1)
+  }
+
   const resArray = await Promise.all(
     requestPages.map((page) => {
       return getRepoForks(repo, token, page)

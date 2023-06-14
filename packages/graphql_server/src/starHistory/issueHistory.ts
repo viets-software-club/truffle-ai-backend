@@ -15,7 +15,7 @@ async function getRepoIssues(
   token?: string,
   page?: number
 ): Promise<AxiosResponse<IssueData[]>> {
-  let url = `https://api.github.com/repos/${repo}/issues?per_page=${DEFAULT_PER_PAGE}`
+  let url = `https://api.github.com/repos/${repo}/issues?per_page=${DEFAULT_PER_PAGE}&sort=created&direction=asc`
 
   if (page !== undefined) {
     url = `${url}&page=${page}`
@@ -100,6 +100,11 @@ async function getRepoIssuesMap(
   requestPages: number[],
   maxRequestAmount: number
 ) {
+  // add the first page if not already in the array
+  if (!requestPages.includes(1)) {
+    requestPages.unshift(1)
+  }
+
   const resArray = await Promise.all(
     requestPages.map((page) => {
       return getRepoIssues(repo, token, page)
