@@ -26,3 +26,5 @@ export type ForksData = {
 export type IssueRecord = StarRecord
 
 export type IssueData = ForksData
+
+export type TimeFrame = 'day' | 'week' | 'month' | '3 month' | '6 month' | 'year'

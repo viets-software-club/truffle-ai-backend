@@ -100,11 +100,6 @@ async function getRepoForksMap(
   requestPages: number[],
   maxRequestAmount: number
 ) {
-  // add the first page if not already in the array
-  if (!requestPages.includes(1)) {
-    requestPages.unshift(1)
-  }
-
   const resArray = await Promise.all(
     requestPages.map((page) => {
       return getRepoForks(repo, token, page)
