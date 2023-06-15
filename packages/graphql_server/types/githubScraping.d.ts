@@ -9,3 +9,8 @@ export type DeveloperRepo = {
 }
 
 export type timeMode = 'daily' | 'weekly' | 'monthly'
+
+export type Repo = {
+  owner: string
+  name: string
+}

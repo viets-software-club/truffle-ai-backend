@@ -1,33 +1,26 @@
 import axios, { AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import * as showdown from 'showdown'
-import { Developer, DeveloperRepo, timeMode } from '../../types/githubScraping'
+import { Developer, DeveloperRepo, timeMode, Repo } from '../../types/githubScraping'
 
 /** Get all the information from the GitHub trending page; all the repos and the names of their creators
  * @param {string} timeMode shoud be 'daily', 'weekly' or 'monthly' => timescope of the trending page
- * @returns {string[]} an array that stores alternatingly the owner and the name of each repo: [owner1, repo1, owner2, repo2]
+ * @returns {Repo[]} - stores the name and owner as {owner: Owner, name: Name}
  */
 export async function fetchTrendingRepos(timeMode: timeMode) {
   const response: AxiosResponse<string> = await axios.get(
     `https://github.com/trending?since=${timeMode}`
   )
   const html = cheerio.load(response.data)
-  const repos: string[] = []
+  const repos: Repo[] = []
 
   html('h2 a').each((i: number, el: cheerio.Element) => {
-    const repoName = html(el).text().trim()
-    repos.push(repoName)
+    const ownerName = html(el).text().trim().split(' ')[0]
+    const splitArray = html(el).text().trim().split(' ')
+    const repoName = html(el).text().trim().split(' ')[splitArray.length - 1]
+    repos.push({ owner: ownerName, name: repoName })
   })
-
-  const trendingSplit: string[] = []
-  // trim the repos to be correctly formatted
-  repos.forEach((repo) => {
-    const trimmedName = repo.replace(/\n\s+/g, '').replace(/\//g, '')
-    const stringSplit = trimmedName.split(' ')
-    trendingSplit.push(stringSplit[0])
-    trendingSplit.push(stringSplit[1])
-  })
-  return trendingSplit
+  return repos
 }
 
 /**  This function imports the ReadMe.md file for a repository (if it can be located)

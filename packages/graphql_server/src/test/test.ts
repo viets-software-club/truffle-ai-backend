@@ -1,4 +1,4 @@
-import { timeMode } from '../../types/githubScraping'
+import { timeMode, Repo } from '../../types/githubScraping'
 import * as github from '../api/githubApi'
 import * as githubScraping from '../scraping/githubScraping'
 import * as eli5 from '../api/openAIApi'
@@ -20,7 +20,7 @@ import * as hackernews from '../scraping/hackerNewsScraping'
  *
  */
 export async function main(timeMode: timeMode, firstNRepos: number) {
-  const trendingSplit: string[] | undefined = await githubScraping.fetchTrendingRepos(timeMode)
+  const trendingSplit: Repo[] | undefined = await githubScraping.fetchTrendingRepos(timeMode)
   // your personal GitHub authToken
   const authToken: string = process.env.GITHUB_API_TOKEN
   // your personal OpenAI API Key
@@ -33,11 +33,9 @@ export async function main(timeMode: timeMode, firstNRepos: number) {
     process.exit()
   }
 
-  trendingSplit.length / 2 < firstNRepos ? (firstNRepos = trendingSplit.length / 2) : null
-
   for (let i = 0; i < firstNRepos; i++) {
-    const owner = trendingSplit[2 * i]
-    const name = trendingSplit[2 * i + 1]
+    const owner = trendingSplit[i].owner
+    const name = trendingSplit[i].name
     const query = `query {
         repository(owner: "${owner}", name: "${name}") {
           name    
