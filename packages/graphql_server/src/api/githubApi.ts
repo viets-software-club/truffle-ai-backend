@@ -264,7 +264,6 @@ export async function getRepositoryTopics(
     return ' '
   }
 }
-
 /**
  * Retrieves an array with all contributors for a given
  * repository and the number of contributions they have made (total count of contributors = length of array)
