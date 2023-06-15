@@ -286,9 +286,7 @@ async function categorizeProjectSpecific(readMeOrCategory: string, categoryGener
   let categoriesSpecific: SpecificCategory[] //checks which general category it is
   switch (categoryGeneral) {
     case 1:
-      categoriesSpecific = [SpecificCategory.CodeEditors,
-                             SpecificCategory.VersionControl,
-                             SpecificCategory.ContinuousIntegration
+      categoriesSpecific =
 
       break
     case 2:
