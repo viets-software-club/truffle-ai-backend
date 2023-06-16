@@ -4,49 +4,18 @@ import * as utils from './utils'
 
 const DEFAULT_PER_PAGE = 30
 
-/** This method retrieves the issues from a page of a GitHub repository
- * @param {string} repo - Name of the Github repository: "owner/repository"
- * @param {string} token - Github Access token
- * @param {number} page - Page Number of the issues to retrieve
- * @param {string} direction - Determines in which order the pages will be: 'asc' | 'desc'
- * All the normal history functions should use 'asc', the partial history should use 'desc'
- * @returns Promise<Object>: A promise that resolves to the issues of the repository
- */
-async function getRepoIssues(
-  repo: string,
-  token: string,
-  page?: number,
-  direction?: string
-): Promise<AxiosResponse<IssueData[]>> {
-  let url = `https://api.github.com/repos/${repo}/issues?per_page=${DEFAULT_PER_PAGE}`
-
-  if (direction != undefined) {
-    url += `&sort=created&direction=${direction}`
-  }
-
-  if (page !== undefined) {
-    url = `${url}&page=${page}`
-  }
-  return axios.get(url, {
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: token ? `token ${token}` : ''
-    }
-  })
-}
-
 /** Retrieves the total count of issues for a Github repository
  * @param {string} repo - Name of the Github repository: "owner/repository"
  * @param {string} token - Github access token
  * @returns Promise<number> : A promise that resolves to the total count of issues for the repository
  */
-async function getRepoIssuesCount(repo: string, token?: string): Promise<number> {
+async function getRepoIssuesCount(repo: string, token: string): Promise<number> {
   const response: AxiosResponse<{ open_issues_count: number }> = await axios.get(
     `https://api.github.com/repos/${repo}`,
     {
       headers: {
         Accept: 'application/vnd.github+json',
-        Authorization: token ? `token ${token}` : ''
+        Authorization: `token ${token}`
       }
     }
   )
@@ -54,92 +23,34 @@ async function getRepoIssuesCount(repo: string, token?: string): Promise<number>
   return response?.data?.open_issues_count
 }
 
-/** Retrieves the issue records (issue count by date) of a Github repository
- * @param {string} repo - Name of the Github repository: "owner/repository"
- * @param {string} token - Github Access token
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issues
- * The higher this value is the more accurate is going to be the graph of the issue history
- * @param {number} startPage - a possible start page for the partial history
- * @returns Promise<Array<{ date: string, count: number }>>: A promise that resolves to an array of issue records
+/** Creates the full history of issues for a repository
+ * Retrieves the issue records (issue count by date) of a GitHub repository and returns them as an array of `IssuRecord` objects.
+ * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
+ * @param {string} token - GitHub Access token for authentication
+ * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issue records.
+ *  * The higher this value is the more accurate is going to be the graph of the issue history
+ * @param {number} startPage - possible startPage for a partialHistory
+ * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
  */
-export async function getRepoIssueRecords(
+export async function fullHistory(
   repo: string,
   token: string,
   maxRequestAmount: number,
   startPage?: number
 ) {
-  const pageCount = await getPageCount(repo, token)
+  const requestPages: number[] = await utils.getHistoryPages(
+    repo,
+    token,
+    maxRequestAmount,
+    'issue',
+    startPage
+  )
 
-  const requestPages: number[] = []
-  if (startPage == undefined) {
-    if (pageCount < maxRequestAmount) {
-      requestPages.push(...utils.range(1, pageCount))
-    } else {
-      utils.range(1, maxRequestAmount).forEach((i: number) => {
-        requestPages.push(Math.round((i * pageCount) / maxRequestAmount) - 1)
-      })
-      if (!requestPages.includes(1)) {
-        requestPages.unshift(1)
-      }
-    }
-  } else {
-    if (pageCount < maxRequestAmount) {
-      requestPages.push(...utils.range(pageCount - startPage, pageCount))
-    } else {
-      utils.range(1, maxRequestAmount).forEach((i: number) => {
-        requestPages.push(
-          Math.round(pageCount - startPage + (i * startPage) / maxRequestAmount) - 1
-        )
-      })
-    }
-  }
-
-  return await getRepoIssuesMap(repo, token, requestPages, maxRequestAmount)
-}
-
-/** Retrieves the page count for the issues in a GitHub repository.
- * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
- * @param {string} token - GitHub access token.
- * @returns {Promise<number>} A promise that resolves to the total number of pages.
- * @throws {object} Throws an error object if the request fails or the repository has no issues.
- */
-async function getPageCount(repo: string, token: string) {
-  const patchRes: AxiosResponse<IssueData[]> = await getRepoIssues(repo, token)
-
-  const headerLink: string = (patchRes.headers['link'] as string) || ''
-
-  let pageCount = 1
-  const regResult = /next.*&page=(\d*).*last/.exec(headerLink)
-
-  if (regResult && regResult[1] && Number.isInteger(Number(regResult[1]))) {
-    pageCount = Number(regResult[1])
-  }
-
-  if (pageCount === 1 && patchRes?.data?.length === 0) {
-    throw {
-      status: patchRes.status,
-      data: []
-    }
-  }
-  return pageCount
-}
-
-/** Retrieves the issue records (issue count by date) of a GitHub repository and returns them as an array of `IssuRecord` objects.
- * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
- * @param {string} token - GitHub Access token for authentication
- * @param {number[]} requestPages - Array of page numbers to request from the API.
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issue records.
- * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
- */
-async function getRepoIssuesMap(
-  repo: string,
-  token: string,
-  requestPages: number[],
-  maxRequestAmount: number
-) {
   const resArray = await Promise.all(
     requestPages.map((page) => {
-      return getRepoIssues(repo, token, page, 'asc')
+      return utils.getRepoPage(repo, token, 'issue', page, 'asc') as Promise<
+        AxiosResponse<IssueData[]>
+      >
     })
   )
 
@@ -181,58 +92,6 @@ async function getRepoIssuesMap(
   return issuesRecords
 }
 
-/** Determines how many pages in the Github history have to be considered to create a specific partial history
- * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
- * @param {string} token - GitHub access token
- * @param {TimeFrame} timeFrame - timeFrame object which determines the timeFrame of the partial history
- * @returns {number} - number of pages to go back in the GitHub history
- */
-async function goBackPages(repo: string, token: string, timeFrame: TimeFrame) {
-  const today = new Date()
-  let startDate = new Date()
-  switch (timeFrame) {
-    case 'day':
-      startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
-      break
-    case 'week':
-      startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)
-      break
-    case 'month':
-      startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate())
-      break
-    case '3 month':
-      startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate())
-      break
-    case '6 month':
-      startDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate())
-      break
-    case 'year':
-      startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
-      break
-  }
-
-  // now starting from the first page with sorted = desc go through the pages to find dates before startDate
-  let foundDate: Date = today
-  let currentPage = 1
-
-  while (foundDate >= startDate) {
-    const resArray = await getRepoIssues(repo, token, currentPage, 'desc')
-    try {
-      foundDate = new Date(resArray.data[29].created_at)
-    } catch {
-      // time frame is longer/older than the oldest issue
-      currentPage = (await getPageCount(repo, token)) - 1
-      return { currentPage, startDate }
-    }
-
-    if (foundDate < startDate) {
-      break
-    }
-    currentPage = Math.max(Math.ceil(currentPage * 1.5), currentPage + 1)
-  }
-  return { currentPage, startDate }
-}
-
 /** Creates the partial issue history for a specific timeframe
  * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
  * @param {string} token - Github access token
@@ -249,17 +108,19 @@ export async function partialHistory(
   maxRequestAmount: number
 ) {
   // calculate the date to go back to
-  const { currentPage, startDate } = await goBackPages(repo, token, timeFrame)
+  const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'issue')
   // more than 7 pages are going to be considered => sufficient information
   if (currentPage >= 8) {
-    return await getRepoIssueRecords(repo, token, maxRequestAmount, currentPage)
+    return await fullHistory(repo, token, maxRequestAmount, currentPage)
   } else {
     // not enough pages are being scraped so we are just taking all the data from the existing pages
-    const pageCount = await getPageCount(repo, token)
+    const pageCount = await utils.getPageCount(repo, token, 'issue')
     const requestPages = utils.range(pageCount - currentPage, pageCount)
     const resArray = await Promise.all(
       requestPages.map((page) => {
-        return getRepoIssues(repo, token, page, 'asc')
+        return utils.getRepoPage(repo, token, 'issue', page, 'asc') as Promise<
+          AxiosResponse<IssueData[]>
+        >
       })
     )
 

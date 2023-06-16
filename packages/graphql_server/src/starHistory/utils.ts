@@ -1,3 +1,7 @@
+import { HistoryType, ForksData, StargazersData, IssueData, TimeFrame } from './types'
+import axios, { AxiosResponse } from 'axios'
+
+const DEFAULT_PER_PAGE = 30
 // utility functions used by currently just the star-history.ts file
 
 /** Function generates an array of numbers within a given range
@@ -46,4 +50,227 @@ export function getDateString(t: Date | number | string, format = 'yyyy/MM/dd hh
     .replace('hh', String(hours))
     .replace('mm', String(minutes))
     .replace('ss', String(seconds))
+}
+
+/** Retrieves the pages to scrape for a parameter of a github repository to
+ * recreate the history for this specific parameter
+ * @param {string} repo - Name of the Github repository: "owner/repository"
+ * @param {string} token - Github Access token
+ * @param {number} maxRequestAmount - Maximum number of API requests to make
+ * The higher this value is the more accurate is going to be the graph of the history
+ * @param {HistoryType} historyType - Determines which history to create
+ * "issue" | "star" | "fork"
+ * @param {number} startPage - a possible start page for the partial history
+ * @returns {number[]} returns a number array of the pages to look at to recreate the history
+ */
+export async function getHistoryPages(
+  repo: string,
+  token: string,
+  maxRequestAmount: number,
+  historyType: HistoryType,
+  startPage?: number
+) {
+  const pageCount = await getPageCount(repo, token, historyType)
+
+  const requestPages: number[] = []
+  if (startPage == undefined || startPage == null) {
+    if (pageCount < maxRequestAmount) {
+      requestPages.push(...range(1, pageCount))
+    } else {
+      range(1, maxRequestAmount).forEach((i: number) => {
+        requestPages.push(Math.round((i * pageCount) / maxRequestAmount) - 1)
+      })
+      if (!requestPages.includes(1)) {
+        requestPages.unshift(1)
+      }
+    }
+  } else {
+    if (pageCount < maxRequestAmount) {
+      requestPages.push(...range(pageCount - startPage, pageCount))
+    } else {
+      range(1, maxRequestAmount).forEach((i: number) => {
+        requestPages.push(
+          Math.round(pageCount - startPage + (i * startPage) / maxRequestAmount) - 1
+        )
+      })
+    }
+  }
+  return requestPages
+}
+
+/** Retrieves the page count for a historyType in a GitHub repository.
+ * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
+ * @param {string} token - GitHub access token.
+ * @param {HistoryType} historyType - what type of history to create
+ * "issue" | "star" | "fork"
+ * @returns {Promise<number>} A promise that resolves to the total number of pages.
+ * @throws {object} Throws an error object if the request fails or the repository has none of the parameter
+ */
+export async function getPageCount(repo: string, token: string, historyType: HistoryType) {
+  let patchRes: AxiosResponse<StargazersData[] | ForksData[] | IssueData[]>
+
+  if (historyType === 'star') {
+    patchRes = await getRepoPage(repo, token, 'star')
+  } else if (historyType === 'fork') {
+    patchRes = await getRepoPage(repo, token, 'fork')
+  } else {
+    patchRes = await getRepoPage(repo, token, 'issue')
+  }
+
+  const headerLink: string = (patchRes.headers['link'] as string) || ''
+
+  let pageCount = 1
+  // Regex to extract the 'next' and 'last' page numbers from GitHub's pagination Link header
+  const regResult = /next.*&page=(\d*).*last/.exec(headerLink)
+
+  if (regResult && regResult[1] && Number.isInteger(Number(regResult[1]))) {
+    pageCount = Number(regResult[1])
+  }
+
+  if (pageCount === 1 && patchRes?.data?.length === 0) {
+    throw {
+      status: patchRes.status,
+      data: []
+    }
+  }
+  return pageCount
+}
+
+/** This method retrieves the historyType from a page of a GitHub repository
+ * @param {string} repo - Name of the Github repository: "owner/repository"
+ * @param {string} token - Github Access token
+ * @param {number} page - Page Number to retrieve
+ * @param {string} direction - Determines in which order the pages will be: 'oldest' | 'newest' / 'asc' | 'desc'
+ * All the normal history functions should use 'oldest' / 'asc', the partial history should use 'newest' / 'desc'
+ * only fork history uses 'oldest' | 'newest'
+ * @param {HistoryType} historyType - determines which history to create
+ * "issue" | "star" | "fork"
+ * @returns Promise<Object>: A promise that resolves to the historyType of the repository
+ */
+export async function getRepoPage(
+  repo: string,
+  token: string,
+  historyType: HistoryType,
+  page?: number,
+  direction?: string
+): Promise<
+  AxiosResponse<ForksData[]> | AxiosResponse<IssueData[]> | AxiosResponse<StargazersData[]>
+> {
+  let url = ''
+  let accept = ''
+  if (historyType == 'fork') {
+    url = `https://api.github.com/repos/${repo}/forks?per_page=${DEFAULT_PER_PAGE}`
+
+    if (direction != undefined) {
+      url += `&sort=${direction}`
+    }
+    accept = 'application/vnd.github+json'
+  } else if (historyType == 'star') {
+    url = `https://api.github.com/repos/${repo}/stargazers?per_page=${DEFAULT_PER_PAGE}`
+
+    if (direction != undefined) {
+      url += `&sort=created&direction=${direction}`
+    }
+    accept = 'application/vnd.github.v3.star+json'
+  } else {
+    url = `https://api.github.com/repos/${repo}/issues?per_page=${DEFAULT_PER_PAGE}`
+
+    if (direction != undefined) {
+      url += `&sort=created&direction=${direction}`
+    }
+    accept = 'application/vnd.github+json'
+  }
+
+  if (page !== undefined) {
+    url = `${url}&page=${page}`
+  }
+
+  return axios.get(url, {
+    headers: {
+      Accept: accept,
+      Authorization: `token ${token}`
+    }
+  })
+}
+
+/** Determines how many pages in the Github history have to be considered to create a specific partial history
+ * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
+ * @param {string} token - GitHub access token
+ * @param {TimeFrame} timeFrame - timeFrame object which determines the timeFrame of the partial history
+ * @param {HistoryType} historyType - determines which type of history to create
+ * @returns {number} - number of pages to go back in the GitHub history
+ */
+export async function goBackPages(
+  repo: string,
+  token: string,
+  timeFrame: TimeFrame,
+  historyType: HistoryType
+) {
+  const today = new Date()
+  let startDate = new Date()
+  switch (timeFrame) {
+    case 'day':
+      startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+      break
+    case 'week':
+      startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7)
+      break
+    case 'month':
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate())
+      break
+    case '3 month':
+      startDate = new Date(today.getFullYear(), today.getMonth() - 3, today.getDate())
+      break
+    case '6 month':
+      startDate = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate())
+      break
+    case 'year':
+      startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+      break
+  }
+
+  // now starting from the first page with sorted = desc go through the pages to find dates before startDate
+  let foundDate: Date = today
+  let currentPage = 1
+
+  while (foundDate >= startDate) {
+    let resArray
+    if (historyType == 'fork') {
+      resArray = (await getRepoPage(
+        repo,
+        token,
+        historyType,
+        currentPage,
+        'newest'
+      )) as AxiosResponse<ForksData[]>
+      try {
+        foundDate = new Date(resArray.data[29].created_at)
+      } catch {
+        // time frame is longer/older than the oldest fork / issue
+        currentPage = (await getPageCount(repo, token, historyType)) - 1
+        return { currentPage, startDate }
+      }
+    } else {
+      resArray = (await getRepoPage(
+        repo,
+        token,
+        historyType,
+        currentPage,
+        'desc'
+      )) as AxiosResponse<StargazersData[]>
+      try {
+        foundDate = new Date(resArray.data[29].starred_at)
+      } catch {
+        // time frame is longer/older than the oldest star
+        currentPage = (await getPageCount(repo, token, historyType)) - 1
+        return { currentPage, startDate }
+      }
+    }
+
+    if (foundDate < startDate) {
+      break
+    }
+    currentPage = Math.max(Math.ceil(currentPage * 1.5), currentPage + 1)
+  }
+  return { currentPage, startDate }
 }
