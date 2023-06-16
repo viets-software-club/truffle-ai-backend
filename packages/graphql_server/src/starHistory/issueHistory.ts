@@ -32,7 +32,7 @@ async function getRepoIssuesCount(repo: string, token: string): Promise<number> 
  * @param {number} startPage - possible startPage for a partialHistory
  * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
  */
-export async function fullHistory(
+export async function getRepoIssueRecords(
   repo: string,
   token: string,
   maxRequestAmount: number,
@@ -111,7 +111,7 @@ export async function partialHistory(
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'issue')
   // more than 7 pages are going to be considered => sufficient information
   if (currentPage >= 8) {
-    return await fullHistory(repo, token, maxRequestAmount, currentPage)
+    return await getRepoIssueRecords(repo, token, maxRequestAmount, currentPage)
   } else {
     // not enough pages are being scraped so we are just taking all the data from the existing pages
     const pageCount = await utils.getPageCount(repo, token, 'issue')

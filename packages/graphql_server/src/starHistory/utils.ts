@@ -171,7 +171,7 @@ export async function getRepoPage(
     if (direction != undefined) {
       url += `&sort=created&direction=${direction}`
     }
-    accept = 'application/vnd.github.v3.star+json'
+    accept = 'application/vnd.github.star+json'
   } else {
     url = `https://api.github.com/repos/${repo}/issues?per_page=${DEFAULT_PER_PAGE}`
 
@@ -229,48 +229,145 @@ export async function goBackPages(
       break
   }
 
-  // now starting from the first page with sorted = desc go through the pages to find dates before startDate
-  let foundDate: Date = today
-  let currentPage = 1
+  // needed to avoid the edge case of a repo having over 40k stars or all the pages
+  let pageCount = 0
+  if (historyType == 'star') {
+    pageCount = await getPageCount(repo, token, 'star')
+  } else if (historyType == 'fork') {
+    pageCount = await getPageCount(repo, token, 'fork')
+  } else {
+    pageCount = await getPageCount(repo, token, 'issue')
+  }
+  return traverseHistory(repo, token, startDate, historyType, pageCount)
+}
 
+/** Traverses the history of a repository based on the specified parameters,
+ * starting from the foundDate and going back to the startDate.
+ * @param repo - name of repository: "owner/name"
+ * @param token - GitHub access token
+ * @param startDate - The date representing the end of the traversal.
+ * @param historyType - The type of history to traverse (fork, star, or issue).
+ * @param pageCount - The total number of pages in the repository's history.
+ * @returns An object containing the updated currentPage and startDate values.
+ */
+async function traverseHistory(
+  repo: string,
+  token: string,
+  startDate: Date,
+  historyType: HistoryType,
+  pageCount: number
+) {
+  let foundDate: Date = new Date()
+  let currentPage = 1
+  // now starting from the first page with sorted = desc go through the pages to find dates before startDate
   while (foundDate >= startDate) {
-    let resArray
-    if (historyType == 'fork') {
-      resArray = (await getRepoPage(
-        repo,
-        token,
-        historyType,
-        currentPage,
-        'newest'
-      )) as AxiosResponse<ForksData[]>
-      try {
-        foundDate = new Date(resArray.data[29].created_at)
-      } catch {
-        // time frame is longer/older than the oldest fork / issue
-        currentPage = (await getPageCount(repo, token, historyType)) - 1
-        return { currentPage, startDate }
+    try {
+      const resArray = await fetchRepoPage(repo, token, historyType, currentPage, pageCount)
+      foundDate = getDateFromResponse(resArray)
+
+      if (currentPage >= pageCount) {
+        return { currentPage: (await getPageCount(repo, token, historyType)) - 1, startDate }
       }
-    } else {
-      resArray = (await getRepoPage(
-        repo,
-        token,
-        historyType,
-        currentPage,
-        'desc'
-      )) as AxiosResponse<StargazersData[]>
-      try {
-        foundDate = new Date(resArray.data[29].starred_at)
-      } catch {
-        // time frame is longer/older than the oldest star
-        currentPage = (await getPageCount(repo, token, historyType)) - 1
-        return { currentPage, startDate }
-      }
+    } catch {
+      currentPage = (await getPageCount(repo, token, historyType)) - 1
+      return { currentPage, startDate }
     }
 
     if (foundDate < startDate) {
       break
     }
-    currentPage = Math.max(Math.ceil(currentPage * 1.5), currentPage + 1)
+
+    const nextPage = await fetchNextPage(
+      currentPage,
+      pageCount,
+      repo,
+      token,
+      historyType,
+      startDate
+    )
+    currentPage = nextPage.currentPage
+    startDate = nextPage.startDate
+    if (currentPage >= pageCount) {
+      return { currentPage: (await getPageCount(repo, token, historyType)) - 1, startDate }
+    }
+  }
+
+  return { currentPage, startDate }
+}
+
+/** Fetches a page of the repository's history based on the provided parameters.
+ * @param repo - name of repository: "owner/name"
+ * @param token - GitHub access token
+ * @param historyType - The type of history to fetch (fork, star, or issue).
+ * @param currentPage - The current page to fetch.
+ * @param pageCount - The total number of pages in the repository's history.
+ * @returns A promise that resolves to the AxiosResponse containing the fetched data.
+ */
+async function fetchRepoPage(
+  repo: string,
+  token: string,
+  historyType: HistoryType,
+  currentPage: number,
+  pageCount: number
+): Promise<
+  AxiosResponse<ForksData[]> | AxiosResponse<StargazersData[]> | AxiosResponse<IssueData[]>
+> {
+  if (historyType === 'fork') {
+    return getRepoPage(repo, token, historyType, currentPage, 'newest') as Promise<
+      AxiosResponse<ForksData[]>
+    >
+  } else if (historyType === 'star') {
+    return getRepoPage(repo, token, historyType, pageCount - currentPage - 1, 'desc') as Promise<
+      AxiosResponse<StargazersData[]>
+    >
+  } else {
+    return getRepoPage(repo, token, historyType, currentPage, 'desc') as Promise<
+      AxiosResponse<IssueData[]>
+    >
+  }
+}
+
+/** Retrieves the date from the response data at the specified index.
+ * @param response - The AxiosResponse object containing the response data.
+ * @returns The extracted date value.
+ * @throws An error if the response or data is invalid.
+ */
+function getDateFromResponse(
+  response:
+    | AxiosResponse<ForksData[]>
+    | AxiosResponse<StargazersData[]>
+    | AxiosResponse<IssueData[]>
+): Date {
+  if ('data' in response && response.data.length > 0) {
+    if ('created_at' in response.data[29]) {
+      return new Date(response.data[29].created_at)
+    } else if ('starred_at' in response.data[29]) {
+      return new Date(response.data[29].starred_at)
+    }
+  }
+  throw new Error('Invalid response')
+}
+
+/** Fetches the next page in the traversal based on the current page and page count.
+ * @param repo - name of repository: "owner/name"
+ * @param token - GitHub access token
+ * @param currentPage - The current page being processed.
+ * @param pageCount - The total number of pages in the repository's history.
+ * @param historyType - The type of history being traversed
+ * @returns {number, Date}
+ **/
+async function fetchNextPage(
+  currentPage: number,
+  pageCount: number,
+  repo: string,
+  token: string,
+  historyType: HistoryType,
+  startDate: Date
+): Promise<{ currentPage: number; startDate: Date }> {
+  currentPage = Math.max(Math.ceil(currentPage * 1.5), currentPage + 1)
+  if (currentPage >= pageCount) {
+    currentPage = (await getPageCount(repo, token, historyType)) - 1
+    return { currentPage, startDate }
   }
   return { currentPage, startDate }
 }

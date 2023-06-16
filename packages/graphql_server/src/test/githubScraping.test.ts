@@ -99,10 +99,10 @@ export async function main(timeMode: timeMode, firstNRepos: number) {
     console.log(await starHistory.getRepoStarRecords(owner + '/' + name, authToken, 10))
 
     // get the fork history of the repo
-    console.log(await forkHistory.fullHistory(owner + '/' + name, authToken, 10))
+    console.log(await forkHistory.getRepoForkRecords(owner + '/' + name, authToken, 10))
 
     // get the issue history of the repo
-    console.log(await issueHistory.fullHistory(owner + '/' + name, authToken, 10))
+    console.log(await issueHistory.getRepoIssueRecords(owner + '/' + name, authToken, 10))
 
     // get the contributor count of the repo
     console.log(await github.getContributorCount(owner, name, authToken))
