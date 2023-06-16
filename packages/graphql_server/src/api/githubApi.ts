@@ -190,6 +190,7 @@ export async function getRepoFounders(owner: string, name: string): Promise<Proj
   const distinctCommiters: ProjectFounder[] = []
 
   // checks, whether a login name appears twice and only pushes distinct founders into the array
+  // @Todo: Optional chaining on node.
   if (response?.data?.data?.repository?.defaultBranchRef?.target?.history?.edges) {
     response.data.data.repository.defaultBranchRef.target.history.edges.forEach((node) => {
       const loginName = node.node.author.user.login

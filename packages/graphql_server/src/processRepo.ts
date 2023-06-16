@@ -58,6 +58,8 @@ export const insertProject = async (name: string, owner: string, trendingState: 
     // if it got inserted, then add the other data sources
     await updateProjectSentiment(name, owner)
     await updateProjectELI5(name, owner)
+    await updateProjectFounders(name, owner)
+    await updateProjectLinkedInData(owner)
     console.log('Inserted ', name, 'owned by', owner)
     return true
   }
@@ -212,7 +214,7 @@ export const updateProjectSentiment = async (repoName: string, owner: string) =>
  * @param {string} organizationHandle - The login of the organization.
  */
 export const updateProjectLinkedInData = async (organizationHandle: string) => {
-  // check if repo is owned by an organization
+  // check if the organizationhandle exists in the database
   const { data: supabaseOrga } = await supabase
     .from('organization')
     .select('id, linkedin_url')
@@ -220,7 +222,7 @@ export const updateProjectLinkedInData = async (organizationHandle: string) => {
   // if owning_organization is null then the project is owned by an user and no linkedIn data is fetched
   // if the linkedIn url is not null then this means that the linkedIn data was already fetched
   // we need to save API tokens so we don't want to fetch the data again
-  if (!supabaseOrga || supabaseOrga?.[0].linkedin_url) {
+  if (!supabaseOrga || supabaseOrga?.[0]?.linkedin_url) {
     return false
   }
 
@@ -252,45 +254,49 @@ export const updateProjectLinkedInData = async (organizationHandle: string) => {
  * @param {string} owner - The name of the owner of the repo.
  */
 export const updateProjectFounders = async (repoName: string, owner: string) => {
-  const founders: ProjectFounder[] = await getRepoFounders(owner, repoName)
-  const projectID: string | null = await getProjectID(repoName, owner)
+  try {
+    const founders: ProjectFounder[] = await getRepoFounders(owner, repoName)
+    const projectID: string | null = await getProjectID(repoName, owner)
 
-  //if the projectID is falsy return
-  if (!projectID) {
-    return
-  }
-
-  for (const founder of founders) {
-    const founderID: string | null = await getPersonID(founder.login)
-    if (!founderID) {
-      // getPersonID inserts the user if they don't exist yet,
-      // so founderID being null means that the user is not on the db and was not inserted
-      continue
-    }
-    const { data: alreadyExists } = await supabase
-      .from('founded_by')
-      .select()
-      .eq('founder_id', founderID)
-      .eq('project_id', projectID)
-
-    if (alreadyExists?.[0]) {
-      continue
+    //if the projectID is falsy return
+    if (!projectID) {
+      return
     }
 
-    const { error: insertError } = await supabase
-      .from('founded_by')
-      .insert({ founder_id: founderID, project_id: projectID })
+    for (const founder of founders) {
+      const founderID: string | null = await getPersonID(founder.login)
+      if (!founderID) {
+        // getPersonID inserts the user if they don't exist yet,
+        // so founderID being null means that the user is not on the db and was not inserted
+        continue
+      }
+      const { data: alreadyExists } = await supabase
+        .from('founded_by')
+        .select()
+        .eq('founder_id', founderID)
+        .eq('project_id', projectID)
 
-    !insertError
-      ? console.log('Added', founder.login, 'as founder for', repoName, 'owned by', owner)
-      : console.log(
-          'Error while adding',
-          founder.login,
-          'as founder for',
-          repoName,
-          'owned by',
-          owner
-        )
+      if (alreadyExists?.[0]) {
+        continue
+      }
+
+      const { error: insertError } = await supabase
+        .from('founded_by')
+        .insert({ founder_id: founderID, project_id: projectID })
+
+      !insertError
+        ? console.log('Added', founder.login, 'as founder for', repoName, 'owned by', owner)
+        : console.log(
+            'Error while adding',
+            founder.login,
+            'as founder for',
+            repoName,
+            'owned by',
+            owner
+          )
+    }
+  } catch (error) {
+    console.error('Error while updating founders for ', repoName, 'owned by', owner)
   }
 }
 
