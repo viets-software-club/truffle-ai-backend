@@ -30,14 +30,20 @@ async function getRepoForksCount(repo: string, token: string): Promise<number> {
  * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the fork records.
  * The higher this value is the more accurate is going to be the graph of the fork history
  * @param {number} startPage - possible startPage for a partialHistory
+ * @param {Date} startDate - possible startDate for a partialHistory
  * @returns {ForkRecord[]} - An array of `ForkRecord` objects representing the fork records.
  */
 export async function getRepoForkRecords(
   repo: string,
   token: string,
   maxRequestAmount: number,
-  startPage?: number
+  startPage?: number,
+  startDate?: Date
 ) {
+  // check if there are any issues at all
+  if ((await getRepoForksCount(repo, token)) == 0) {
+    return {}
+  }
   const requestPages: number[] = await utils.getHistoryPages(
     repo,
     token,
@@ -89,7 +95,15 @@ export async function getRepoForkRecords(
     })
   })
 
-  return forkRecords
+  if (startDate == undefined || startDate == null) {
+    return forkRecords
+  }
+
+  // filter out the wrong dates
+  return forkRecords.filter((item) => {
+    const itemDate = new Date(item.date)
+    return itemDate >= startDate
+  })
 }
 
 /** Creates the partial fork history for a specific timeframe
@@ -101,17 +115,21 @@ export async function getRepoForkRecords(
  * This mostly happens for short timeframes / not a lot of forks
  * @returns {ForkRecord[]} - An array of `ForkRecord` objects representing the fork records.
  */
-export async function partialHistory(
+export async function partialForkHistory(
   repo: string,
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
 ) {
+  // check if there are any issues at all
+  if ((await getRepoForksCount(repo, token)) == 0) {
+    return {}
+  }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'fork')
   // more than 7 pages are going to be considered => sufficient information
   if (currentPage >= 8) {
-    return await getRepoForkRecords(repo, token, maxRequestAmount, currentPage)
+    return await getRepoForkRecords(repo, token, maxRequestAmount, currentPage, startDate)
   } else {
     // not enough pages are being scraped so we are just taking all the data from the existing pages
     const pageCount = await utils.getPageCount(repo, token, 'fork')

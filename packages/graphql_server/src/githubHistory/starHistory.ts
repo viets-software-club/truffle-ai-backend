@@ -30,14 +30,20 @@ async function getRepoStargazersCount(repo: string, token: string): Promise<numb
  * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the star records.
  * The higher this value is the more accurate is going to be the graph of the star history
  * @param {number} startPage - possible startPage for a partialHistory
+ * @param {Date} startDate - possible startDate for a partialHistory
  * @returns {StarRecord[]} - An array of `StarRecord` objects representing the star records.
  */
 export async function getRepoStarRecords(
   repo: string,
   token: string,
   maxRequestAmount: number,
-  startPage?: number
+  startPage?: number,
+  startDate?: Date
 ) {
+  // check if there are any issues at all
+  if ((await getRepoStargazersCount(repo, token)) == 0) {
+    return {}
+  }
   const requestPages: number[] = await utils.getHistoryPages(repo, token, 10, 'star', startPage)
 
   const resArray = await Promise.all(
@@ -83,7 +89,15 @@ export async function getRepoStarRecords(
     })
   })
 
-  return starRecords
+  if (startDate == undefined || startDate == null) {
+    return starRecords
+  }
+
+  // filter out the wrong dates
+  return starRecords.filter((item) => {
+    const itemDate = new Date(item.date)
+    return itemDate >= startDate
+  })
 }
 
 /** Creates the partial star history for a specific timeframe
@@ -95,18 +109,22 @@ export async function getRepoStarRecords(
  * This mostly happens for short timeframes / not a lot of stars
  * @returns {StarRecord[]} - An array of `StarRecord` objects representing the star records.
  */
-export async function partialHistory(
+export async function partialStarHistory(
   repo: string,
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
 ) {
+  // check if there are any issues at all
+  if ((await getRepoStargazersCount(repo, token)) == 0) {
+    return {}
+  }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'star')
 
   // more than 7 pages are going to be considered => sufficient information
   if (currentPage >= 8) {
-    return await getRepoStarRecords(repo, token, maxRequestAmount, currentPage)
+    return await getRepoStarRecords(repo, token, maxRequestAmount, currentPage, startDate)
   } else {
     // not enough pages are being scraped so we are just taking all the data from the existing pages
     const pageCount = await utils.getPageCount(repo, token, 'star')

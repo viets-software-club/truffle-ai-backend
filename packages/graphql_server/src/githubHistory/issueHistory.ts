@@ -28,16 +28,22 @@ async function getRepoIssuesCount(repo: string, token: string): Promise<number> 
  * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
  * @param {string} token - GitHub Access token for authentication
  * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issue records.
- *  * The higher this value is the more accurate is going to be the graph of the issue history
+ * The higher this value is the more accurate is going to be the graph of the issue history
  * @param {number} startPage - possible startPage for a partialHistory
+ * @param {Date} startDate - possible startDate for a partialHistory
  * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
  */
 export async function getRepoIssueRecords(
   repo: string,
   token: string,
   maxRequestAmount: number,
-  startPage?: number
+  startPage?: number,
+  startDate?: Date
 ) {
+  // check if there are any issues at all
+  if ((await getRepoIssuesCount(repo, token)) == 0) {
+    return {}
+  }
   const requestPages: number[] = await utils.getHistoryPages(
     repo,
     token,
@@ -89,7 +95,15 @@ export async function getRepoIssueRecords(
     })
   })
 
-  return issuesRecords
+  if (startDate == undefined || startDate == null) {
+    return issuesRecords
+  }
+
+  // filter out the wrong dates
+  return issuesRecords.filter((item) => {
+    const itemDate = new Date(item.date)
+    return itemDate >= startDate
+  })
 }
 
 /** Creates the partial issue history for a specific timeframe
@@ -101,17 +115,21 @@ export async function getRepoIssueRecords(
  * This mostly happens for short timeframes / not a lot of issues
  * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
  */
-export async function partialHistory(
+export async function partialIssueHistory(
   repo: string,
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
 ) {
+  // check if there are any issues at all
+  if ((await getRepoIssuesCount(repo, token)) == 0) {
+    return {}
+  }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'issue')
   // more than 7 pages are going to be considered => sufficient information
   if (currentPage >= 8) {
-    return await getRepoIssueRecords(repo, token, maxRequestAmount, currentPage)
+    return await getRepoIssueRecords(repo, token, maxRequestAmount, currentPage, startDate)
   } else {
     // not enough pages are being scraped so we are just taking all the data from the existing pages
     const pageCount = await utils.getPageCount(repo, token, 'issue')

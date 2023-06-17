@@ -7,7 +7,7 @@ import {
 } from './dataAggregation'
 import { ProjectInsertion, ProjectUpdate } from '../types/dataAggregation'
 import { GitHubInfo } from '../types/githubApi'
-import { getRepoStarRecords } from './starHistory/starHistory'
+import { getRepoStarRecords } from './githubHistory/starHistory'
 import { StarRecord } from '../types/starHistory'
 import { TrendingState } from '../types/processRepo'
 import { fetchRepositoryReadme } from './scraping/githubScraping'

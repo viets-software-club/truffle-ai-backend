@@ -287,7 +287,7 @@ async function traverseHistory(
     )
     currentPage = nextPage.currentPage
     startDate = nextPage.startDate
-    if (currentPage >= pageCount) {
+    if (currentPage >= pageCount - 1) {
       return { currentPage: (await getPageCount(repo, token, historyType)) - 1, startDate }
     }
   }

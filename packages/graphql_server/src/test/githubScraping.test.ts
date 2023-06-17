@@ -2,9 +2,9 @@ import { timeMode } from '../../types/githubScraping'
 import * as github from '../api/githubApi'
 import * as githubScraping from '../scraping/githubScraping'
 import * as eli5 from '../api/openAIApi'
-import * as starHistory from '../starHistory/starHistory'
-import * as forkHistory from '../starHistory/forkHistory'
-import * as issueHistory from '../starHistory/issueHistory'
+import * as starHistory from '../githubHistory/starHistory'
+import * as forkHistory from '../githubHistory/forkHistory'
+import * as issueHistory from '../githubHistory/issueHistory'
 import * as hackernews from '../scraping/hackerNewsScraping'
 
 /** Main function to test the functionality of the different methods
