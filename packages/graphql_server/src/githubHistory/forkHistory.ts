@@ -39,10 +39,10 @@ export async function getRepoForkRecords(
   maxRequestAmount: number,
   startPage?: number,
   startDate?: Date
-) {
+): Promise<ForkRecord[]> {
   // check if there are any issues at all
   if ((await getRepoForksCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   const requestPages: number[] = await utils.getHistoryPages(
     repo,
@@ -120,10 +120,10 @@ export async function partialForkHistory(
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
-) {
+): Promise<ForkRecord[]> {
   // check if there are any issues at all
   if ((await getRepoForksCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'fork')

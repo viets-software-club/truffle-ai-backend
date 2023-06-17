@@ -39,10 +39,10 @@ export async function getRepoIssueRecords(
   maxRequestAmount: number,
   startPage?: number,
   startDate?: Date
-) {
+): Promise<IssueRecord[]> {
   // check if there are any issues at all
   if ((await getRepoIssuesCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   const requestPages: number[] = await utils.getHistoryPages(
     repo,
@@ -120,10 +120,10 @@ export async function partialIssueHistory(
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
-) {
+): Promise<IssueRecord[]> {
   // check if there are any issues at all
   if ((await getRepoIssuesCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'issue')

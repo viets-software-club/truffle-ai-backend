@@ -39,10 +39,10 @@ export async function getRepoStarRecords(
   maxRequestAmount: number,
   startPage?: number,
   startDate?: Date
-) {
+): Promise<StarRecord[]> {
   // check if there are any issues at all
   if ((await getRepoStargazersCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   const requestPages: number[] = await utils.getHistoryPages(repo, token, 10, 'star', startPage)
 
@@ -114,10 +114,10 @@ export async function partialStarHistory(
   token: string,
   timeFrame: TimeFrame,
   maxRequestAmount: number
-) {
+): Promise<StarRecord[]> {
   // check if there are any issues at all
   if ((await getRepoStargazersCount(repo, token)) == 0) {
-    return {}
+    return []
   }
   // calculate the date to go back to
   const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'star')
