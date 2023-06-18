@@ -32,7 +32,8 @@
   "workspaces": [
     "packages/graphql_server",
     "packages/graphql_gateway",
-    "packages/repo_job"
+    "packages/repo_job",
+    "packages/api"
   ],
   "lint-staged": {
     "*.{js,ts}": [

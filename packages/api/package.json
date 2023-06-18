@@ -1,0 +1,21 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "config": {
+    "env_dev": ". ../../env.sh"
+  },
+  "scripts": {
+    "build:src": "tsc --project tsconfig.json",
+    "build:tests": "tsc --project tsconfig.test.json",
+    "test:githubApi": "$npm_package_config_env_dev && node dist/test/githubApi.test.js",
+    "test:openAIApi": "$npm_package_config_env_dev && node dist/test/openAIApi.test.js",
+    "test:githubScraper": "$npm_package_config_env_dev && node dist/test/githubScraper.test.js",
+    "test:hackernewsScraper": "$npm_package_config_env_dev && node dist/test/hackernewsScraper.test.js",
+    "test:linkedinScraper": "$npm_package_config_env_dev && node dist/test/linkedinScraper.test.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  }
+}
