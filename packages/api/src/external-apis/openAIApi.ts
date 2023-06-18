@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { RequestBodyOpenAI, ResponseBodyOpenAi } from '../../types/openAIApi'
 
 export { getELI5FromReadMe, getHackernewsSentiment, categorizeProjectGeneral }
 
@@ -8,7 +7,7 @@ const openAIapiUrl = 'https://api.openai.com/v1/chat/completions'
 const errorMessage =
   'The fetched response was empty. Most likely there is something wrong with the JSON request.'
 
-//The Header for all requests
+// The Header for all requests
 const headers = {
   'Content-Type': 'application/json',
   Authorization: 'Bearer ' + process.env.OPENAI_API_KEY

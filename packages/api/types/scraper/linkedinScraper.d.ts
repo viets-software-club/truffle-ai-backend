@@ -1,4 +1,4 @@
-export type LinkedInCompanyProfile = {
+type LinkedInCompanyProfile = {
   url: string
   name: string
   founded: string
@@ -13,14 +13,14 @@ export type LinkedInCompanyProfile = {
   specialties: string
 }
 
-export type LinkedInUpdate = {
+type LinkedInUpdate = {
   time: string
   text: string
   likes_count: number
   comments_count: number
 }
 
-export type CompanyDataResponse = {
+type CompanyDataResponse = {
   url: string
   name: string
   founded: string

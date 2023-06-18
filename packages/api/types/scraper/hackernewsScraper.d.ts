@@ -1,4 +1,4 @@
-export type HackerNewsStoriesResponse = {
+type HackerNewsStoriesResponse = {
   hits: {
     created_at: string
     title: string
@@ -37,7 +37,7 @@ export type HackerNewsStoriesResponse = {
   }[]
 }
 
-export type HackerNewsStoriesResponseHitsArray = {
+type HackerNewsStoriesResponseHitsArray = {
   created_at: string
   title: string
   url: string | null
@@ -59,7 +59,7 @@ export type HackerNewsStoriesResponseHitsArray = {
     author: Record<string, unknown>
   }
 }[]
-export type HackerNewsStoriesResponseHit = {
+type HackerNewsStoriesResponseHit = {
   created_at: string
   title: string
   url: string | null
@@ -82,7 +82,7 @@ export type HackerNewsStoriesResponseHit = {
   }
 }
 
-export type GetHackerNewsCommentsResponseHitArray = {
+type GetHackerNewsCommentsResponseHitArray = {
   created_at: string
   title?: string | null
   url?: string | null
@@ -101,7 +101,7 @@ export type GetHackerNewsCommentsResponseHitArray = {
   _highlightResult: unknown
 }[]
 
-export type EachHackerNewsComment = {
+type EachHackerNewsComment = {
   created_at: string
   title: null
   url: null
@@ -125,6 +125,6 @@ export type EachHackerNewsComment = {
   }
 }
 
-export type GetHackerNewsCommentsResponseHits = {
+type GetHackerNewsCommentsResponseHits = {
   hits: EachHackerNewsComment[]
 }

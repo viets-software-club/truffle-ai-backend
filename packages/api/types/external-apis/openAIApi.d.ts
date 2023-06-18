@@ -1,4 +1,4 @@
-export type OpenAIResponse = {
+type OpenAIResponse = {
   choices: {
     message: {
       content: string
@@ -6,7 +6,7 @@ export type OpenAIResponse = {
   }[]
 }
 
-export type RequestBodyOpenAI = {
+type RequestBodyOpenAI = {
   model: string
   messages: {
     role: string
@@ -14,7 +14,7 @@ export type RequestBodyOpenAI = {
   }[]
 }
 
-export type ResponseBodyOpenAi = {
+type ResponseBodyOpenAi = {
   id: string
   object: string
   created: number

@@ -1,31 +1,22 @@
 import axios, { AxiosResponse } from 'axios'
-import {
-  GitHubOrganization,
-  GitHubUser,
-  GitHubInfo,
-  GitHubCommitHistory,
-  ProjectFounder,
-  RepositoryTopicsResponse,
-  ContributorData
-} from '../../types/githubApi'
 
-const githubApiUrl = process.env.GITHUB_API_URL || ''
+const githubApiUrl = process.env.GITHUB_API_URL
+
 /** Gets the repo's information via GitHub's GraphQL API
  * @param {string} query GraphQL query for the repo (including owner and name)
  * @param {string} authToken personal authorization token
  * @returns {any[]} the json data for the requested repo as by the graphql query
  */
 export async function getRepoInfo(query: string, authToken: string): Promise<GitHubInfo | null> {
+  const config = {
+    headers: {
+      Authorization: authToken
+    }
+  }
   const response: AxiosResponse<{ data: { repository: GitHubInfo } }> = await axios.post(
     githubApiUrl,
-    {
-      query
-    },
-    {
-      headers: {
-        Authorization: authToken
-      }
-    }
+    { query },
+    config
   )
   return response.data.data.repository
 }

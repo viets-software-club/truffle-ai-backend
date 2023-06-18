@@ -1,29 +1,18 @@
 import axios from 'axios'
 
-import {
-  HackerNewsStoriesResponse,
-  HackerNewsStoriesResponseHitsArray,
-  HackerNewsStoriesResponseHit,
-  GetHackerNewsCommentsResponseHits,
-  GetHackerNewsCommentsResponseHitArray
-} from '../../types/hackerNewsScraping'
-
-export { searchHackerNewsStories }
-
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
  * and generate an OpenAI request.
  * @param name - The search query to find Hacker News stories.
  * @returns the comments and the links to the posts. please receive in this format: let [comments, links] = searchHackerNewsStories("companyname")
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function searchHackerNewsStories(name: string) {
   const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
   const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
   const linksOfPosts: string[] = []
   try {
     const response = await axios.get(url)
-    const formattedJson = response.data as HackerNewsStoriesResponse
+    const formattedJson = response?.data as HackerNewsStoriesResponse
     const hitslist: HackerNewsStoriesResponseHitsArray = formattedJson.hits
     for (let i = 0; i < hitslist.length; i++) {
       const hit: HackerNewsStoriesResponseHit = hitslist[i]
@@ -91,3 +80,5 @@ function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
   const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
   return timeDiff > twoMonthsInMillis
 }
+
+export { searchHackerNewsStories }

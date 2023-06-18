@@ -1,5 +1,4 @@
 import axios, { AxiosRequestConfig } from 'axios'
-import { LinkedInCompanyProfile, CompanyDataResponse } from '../../types/linkedInScraping'
 
 const username = process.env.SCRAPING_BOT_USER_NAME || ''
 const apiKey = process.env.SCRAPING_BOT_API_KEY || ''

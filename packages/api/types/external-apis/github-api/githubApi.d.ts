@@ -1,5 +1,5 @@
 // Github info type as returned by GraphQL API
-export type GitHubInfo = {
+type GitHubInfo = {
   name?: string
   description?: string
   stargazerCount?: number
@@ -11,7 +11,7 @@ export type GitHubInfo = {
   languages?: { edges?: { node?: { name?: string; color?: string } }[] }
 }
 
-export type RepositoryTopicsResponse = {
+type RepositoryTopicsResponse = {
   data: {
     repository: {
       repositoryTopics: {
@@ -26,7 +26,7 @@ export type RepositoryTopicsResponse = {
 }
 
 // Github organization info type as returned by GraphQL API
-export type GitHubOrganization = {
+type GitHubOrganization = {
   name?: string
   login?: string
   avatarUrl?: string
@@ -38,7 +38,7 @@ export type GitHubOrganization = {
 }
 
 // Github user info type as returned by GraphQL API
-export type GitHubUser = {
+type GitHubUser = {
   name?: string
   login?: string
   avatarUrl?: string
@@ -50,14 +50,14 @@ export type GitHubUser = {
 }
 
 // Github user info of a project founder
-export type ProjectFounder = {
+type ProjectFounder = {
   name: string
   login: string
   twitterUsername: string
 }
 
 // GitHub repository commit history
-export type GitHubCommitHistory = {
+type GitHubCommitHistory = {
   defaultBranchRef: {
     target: {
       history: {
@@ -77,7 +77,7 @@ export type GitHubCommitHistory = {
   }
 }
 // Edge in the Github Commit History
-export type Edge = {
+type Edge = {
   node: {
     author: {
       user: {
@@ -88,7 +88,7 @@ export type Edge = {
 }
 
 // structure of the Github Commit History on the main branch of a repo
-export type ContributorResponse = {
+type ContributorResponse = {
   data: {
     repository: {
       defaultBranchRef: {
@@ -103,7 +103,7 @@ export type ContributorResponse = {
   }
 }
 
-export type ContributorData = {
+type ContributorData = {
   headers: {
     link?: string
   }

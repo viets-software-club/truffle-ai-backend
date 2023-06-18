@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import * as showdown from 'showdown'
-import { Developer, DeveloperRepo, timeMode } from '../../types/githubScraping'
 
 /** Get all the information from the GitHub trending page; all the repos and the names of their creators
  * @param {string} timeMode shoud be 'daily', 'weekly' or 'monthly' => timescope of the trending page
@@ -36,7 +35,7 @@ export async function fetchTrendingRepos(timeMode: timeMode) {
  * @returns {string} a string containing the text of the repo. Throws an error if file can't be located
  * @todo paths in the beginning can be constantly adapted if new ReadMe file locations are being found
  */
-export async function fetchRepositoryReadme(owner: string, name: string) {
+async function fetchRepositoryReadme(owner: string, name: string) {
   // these paths exists to check in multiple locations for the readme files
   const readmePaths: string[] = [
     `https://raw.githubusercontent.com/${owner}/${name}/release/readme.md`,
@@ -69,9 +68,9 @@ export async function fetchRepositoryReadme(owner: string, name: string) {
  * @param {string} timeMode describes the timeframe; 'daily' | 'weekly' | 'monthly'
  * @returns   list of {name: 'NAME', username: 'USERNAME', repo: 'REPO'}
  */
-export async function fetchTrendingDevelopers(timeMode: timeMode) {
+async function fetchTrendingDevelopers(timeMode: timeMode) {
   await axios
-    .get('https://github.com/trending/developers?since=' + timeMode)
+    .get(`https://github.com/trending/developers?since=${timeMode}`)
     .then((response: { data: string | Buffer }) => {
       const htmlC = cheerio.load(response.data)
       const developers: Developer[] = []
@@ -101,3 +100,5 @@ export async function fetchTrendingDevelopers(timeMode: timeMode) {
       })
     })
 }
+
+export { fetchRepositoryReadme, fetchTrendingDevelopers }

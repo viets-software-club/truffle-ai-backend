@@ -1,6 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { StarRecord, StargazersData } from './types'
-import * as utils from './utils'
+import { range, getDateString } from './githubUtils'
 
 const DEFAULT_PER_PAGE = 30
 
@@ -75,9 +74,9 @@ export async function getRepoStarRecords(repo: string, token: string, maxRequest
 
   const requestPages: number[] = []
   if (pageCount < maxRequestAmount) {
-    requestPages.push(...utils.range(1, pageCount))
+    requestPages.push(...range(1, pageCount))
   } else {
-    utils.range(1, maxRequestAmount).forEach((i: number) => {
+    range(1, maxRequestAmount).forEach((i: number) => {
       requestPages.push(Math.round((i * pageCount) / maxRequestAmount) - 1)
     })
     if (!requestPages.includes(1)) {
@@ -114,7 +113,7 @@ async function getRepoStarsMap(
       starRecordsData.push(...data)
     })
     for (let i = 0; i < starRecordsData.length; ) {
-      starRecordsMap.set(utils.getDateString(starRecordsData[i].starred_at), i + 1)
+      starRecordsMap.set(getDateString(starRecordsData[i].starred_at), i + 1)
       i += Math.floor(starRecordsData.length / maxRequestAmount) || 1
     }
   } else {
@@ -122,7 +121,7 @@ async function getRepoStarsMap(
       if (data.length > 0) {
         const starRecord = data[0]
         starRecordsMap.set(
-          utils.getDateString(starRecord.starred_at),
+          getDateString(starRecord.starred_at),
           DEFAULT_PER_PAGE * (requestPages[index] - 1)
         )
       }
@@ -130,7 +129,7 @@ async function getRepoStarsMap(
   }
 
   const starAmount = await getRepoStargazersCount(repo, token)
-  starRecordsMap.set(utils.getDateString(Date.now()), starAmount)
+  starRecordsMap.set(getDateString(Date.now()), starAmount)
 
   const starRecords: StarRecord[] = []
 

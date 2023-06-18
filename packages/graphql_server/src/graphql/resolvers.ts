@@ -1,6 +1,6 @@
 import { exposeProjectsData } from './resolver/projects'
 import { createProject } from '../dbUpdater'
-import { parseGitHubUrl } from '../utils'
+// import { parseGitHubUrl } from '../utils'
 
 const resolvers = {
   Query: {
@@ -16,12 +16,12 @@ const resolvers = {
     },
     // takes in variables. Parent object _ is never used
     addProjectByUrl: async (_: unknown, { url }: { url: string }) => {
-      const urlParts = parseGitHubUrl(url)
-      if (urlParts === null) {
-        return false
-      } else {
-        return await createProject(urlParts.repo, urlParts.owner, null)
-      }
+      // const urlParts = parseGitHubUrl(url)
+      // if (urlParts === null) {
+      //   return false
+      // } else {
+      //   return await createProject(urlParts.repo, urlParts.owner, null)
+      // }
     }
   }
 }

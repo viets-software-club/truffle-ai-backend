@@ -1,4 +1,4 @@
-export type StargazersData = {
+type StargazersData = {
   length: number
   headers: {
     link?: string
@@ -7,7 +7,7 @@ export type StargazersData = {
   starred_at: string
 }
 
-export type StarRecord = {
+type StarRecord = {
   date: string
   count: number
 }

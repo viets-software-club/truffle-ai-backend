@@ -3,7 +3,7 @@ import {
   updateAllProjectInfo,
   updateProjectGithubStats,
   updateProjectTrendingStatesForListOfRepos
-} from './updateProject'
+} from '../../api/updateProject'
 import {
   getOrganizationID,
   getPersonID,
@@ -11,7 +11,7 @@ import {
   repoIsAlreadyInDB,
   deleteNotTrendingAndNotBookmarkedProjects,
   getTrendingAndBookmarkedProjects
-} from './supabaseUtils'
+} from '../../api/supabaseUtils'
 import { fetchTrendingRepos } from './scraping/githubScraping'
 import { TrendingState } from '../types/updateProject'
 
