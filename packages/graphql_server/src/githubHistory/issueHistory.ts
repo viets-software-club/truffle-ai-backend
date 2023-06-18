@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { IssueRecord, IssueData, TimeFrame } from './types'
+import { IssueRecord, IssueData } from './types'
 import * as utils from './utils'
 
 const DEFAULT_PER_PAGE = 30
@@ -104,78 +104,4 @@ export async function getRepoIssueRecords(
     const itemDate = new Date(item.date)
     return itemDate >= startDate
   })
-}
-
-/** Creates the partial issue history for a specific timeframe
- * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
- * @param {string} token - Github access token
- * @param {TimeFrame} timeFrame - time frame that the history takes into account
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issue records.
- * This value can be exceeded by up to 6 times if there aren't many pages being looked at for the history
- * This mostly happens for short timeframes / not a lot of issues
- * @returns {IssueRecord[]} - An array of `IssueRecord` objects representing the issue records.
- */
-export async function partialIssueHistory(
-  repo: string,
-  token: string,
-  timeFrame: TimeFrame,
-  maxRequestAmount: number
-): Promise<IssueRecord[]> {
-  // check if there are any issues at all
-  if ((await getRepoIssuesCount(repo, token)) == 0) {
-    return []
-  }
-  // calculate the date to go back to
-  const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'issue')
-  // more than 7 pages are going to be considered => sufficient information
-  if (currentPage >= 8) {
-    return await getRepoIssueRecords(repo, token, maxRequestAmount, currentPage, startDate)
-  } else {
-    // not enough pages are being scraped so we are just taking all the data from the existing pages
-    const pageCount = await utils.getPageCount(repo, token, 'issue')
-    const requestPages = utils.range(pageCount - currentPage, pageCount)
-    const resArray = await Promise.all(
-      requestPages.map((page) => {
-        return utils.getRepoPage(repo, token, 'issue', page, 'asc') as Promise<
-          AxiosResponse<IssueData[]>
-        >
-      })
-    )
-
-    const issuesRecordsMap: Map<string, number> = new Map()
-
-    resArray.forEach(({ data }: { data: { created_at: string }[] }, index) => {
-      if (data.length > 0) {
-        for (let i = 0; i < 6; i++) {
-          // try statement because the last page might not be full
-          try {
-            const issuesRecord = data[5 * i]
-            issuesRecordsMap.set(
-              utils.getDateString(issuesRecord.created_at),
-              DEFAULT_PER_PAGE * (requestPages[index] - 1) + 5 * i
-            )
-          } catch {
-            break
-          }
-        }
-      }
-    })
-    const issuesAmount = await getRepoIssuesCount(repo, token)
-    issuesRecordsMap.set(utils.getDateString(Date.now()), issuesAmount)
-
-    const issuesRecords: IssueRecord[] = []
-
-    issuesRecordsMap.forEach((v, k) => {
-      issuesRecords.push({
-        date: k,
-        count: v
-      })
-    })
-
-    // filter out the wrong dates
-    return issuesRecords.filter((item) => {
-      const itemDate = new Date(item.date)
-      return itemDate >= startDate
-    })
-  }
 }

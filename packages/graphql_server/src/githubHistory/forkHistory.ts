@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { ForkRecord, ForksData, TimeFrame } from './types'
+import { ForkRecord, ForksData } from './types'
 import * as utils from './utils'
 
 const DEFAULT_PER_PAGE = 30
@@ -104,78 +104,4 @@ export async function getRepoForkRecords(
     const itemDate = new Date(item.date)
     return itemDate >= startDate
   })
-}
-
-/** Creates the partial fork history for a specific timeframe
- * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
- * @param {string} token - Github access token
- * @param {TimeFrame} timeFrame - time frame that the history takes into account
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the fork records.
- * This value can be exceeded by up to 6 times if there aren't many pages being looked at for the history
- * This mostly happens for short timeframes / not a lot of forks
- * @returns {ForkRecord[]} - An array of `ForkRecord` objects representing the fork records.
- */
-export async function partialForkHistory(
-  repo: string,
-  token: string,
-  timeFrame: TimeFrame,
-  maxRequestAmount: number
-): Promise<ForkRecord[]> {
-  // check if there are any issues at all
-  if ((await getRepoForksCount(repo, token)) == 0) {
-    return []
-  }
-  // calculate the date to go back to
-  const { currentPage, startDate } = await utils.goBackPages(repo, token, timeFrame, 'fork')
-  // more than 7 pages are going to be considered => sufficient information
-  if (currentPage >= 8) {
-    return await getRepoForkRecords(repo, token, maxRequestAmount, currentPage, startDate)
-  } else {
-    // not enough pages are being scraped so we are just taking all the data from the existing pages
-    const pageCount = await utils.getPageCount(repo, token, 'fork')
-    const requestPages = utils.range(pageCount - currentPage, pageCount)
-    const resArray = await Promise.all(
-      requestPages.map((page) => {
-        return utils.getRepoPage(repo, token, 'fork', page, 'oldest') as Promise<
-          AxiosResponse<ForksData[]>
-        >
-      })
-    )
-
-    const forkRecordsMap: Map<string, number> = new Map()
-
-    resArray.forEach(({ data }: { data: { created_at: string }[] }, index) => {
-      if (data.length > 0) {
-        for (let i = 0; i < 6; i++) {
-          // try statement because the last page might not be full
-          try {
-            const forkRecord = data[5 * i]
-            forkRecordsMap.set(
-              utils.getDateString(forkRecord.created_at),
-              DEFAULT_PER_PAGE * (requestPages[index] - 1) + 5 * i
-            )
-          } catch {
-            break
-          }
-        }
-      }
-    })
-    const forkAmount = await getRepoForksCount(repo, token)
-    forkRecordsMap.set(utils.getDateString(Date.now()), forkAmount)
-
-    const forkRecords: ForkRecord[] = []
-
-    forkRecordsMap.forEach((v, k) => {
-      forkRecords.push({
-        date: k,
-        count: v
-      })
-    })
-
-    // filter out the wrong dates
-    return forkRecords.filter((item) => {
-      const itemDate = new Date(item.date)
-      return itemDate >= startDate
-    })
-  }
 }
