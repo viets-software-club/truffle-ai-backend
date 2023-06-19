@@ -1,18 +1,18 @@
 import supabase from './supabase'
 import {
   getOrganizationID,
-  getGithubData,
   getPersonID,
-  turnIntoProjectInsertion
-} from './dataAggregation'
-import { ProjectInsertion, ProjectUpdate } from '../types/dataAggregation'
+  turnIntoProjectInsertion,
+  repoIsAlreadyInDB
+} from './supabaseUtils'
+import { getGithubData } from './utils'
+import { ProjectInsertion, ProjectUpdate } from '../types/supabaseUtils'
 import { GitHubInfo } from '../types/githubApi'
 import { getRepoStarRecords } from './githubHistory/starHistory'
 import { StarRecord } from '../types/starHistory'
-import { TrendingState } from '../types/processRepo'
+import { TrendingState } from '../types/updateProject'
 import { fetchRepositoryReadme } from './scraping/githubScraping'
 import { getELI5FromReadMe } from './api/openAIApi'
-import { repoIsAlreadyInDB } from './dbUpdater'
 
 /**
  * Adds a repo to the database.
