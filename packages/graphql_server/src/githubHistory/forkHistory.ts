@@ -10,24 +10,28 @@ const DEFAULT_PER_PAGE = 30
  * @returns Promise<number> : A promise that resolves to the total count of forks for the repository
  */
 async function getRepoForksCount(repo: string, token: string): Promise<number> {
-  const response: AxiosResponse<{ forks_count: number }> = await axios.get(
-    `https://api.github.com/repos/${repo}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `token ${token}`
+  try {
+    const response: AxiosResponse<{ forks_count: number }> = await axios.get(
+      `https://api.github.com/repos/${repo}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `token ${token}`
+        }
       }
-    }
-  )
+    )
 
-  return response?.data?.forks_count
+    return response?.data?.forks_count
+  } catch {
+    return 0
+  }
 }
 
 /** Creates the full history of forks for a repository
  * Retrieves the fork records (fork count by date) of a GitHub repository and returns them as an array of `ForkRecord` objects.
  * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
  * @param {string} token - GitHub Access token for authentication (optional).
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the fork records.
+ * @param {number} maxRequestAmount - Range: [2, 100]; Maximum number of API requests to make to retrieve the star records
  * The higher this value is the more accurate is going to be the graph of the fork history
  * @param {number} startPage - possible startPage for a partialHistory
  * @param {Date} startDate - possible startDate for a partialHistory
@@ -40,6 +44,10 @@ export async function getRepoForkRecords(
   startPage?: number,
   startDate?: Date
 ): Promise<ForkRecord[]> {
+  // check that maxRequestAmount is a valid value
+  if (maxRequestAmount > 100 || maxRequestAmount < 2) {
+    return []
+  }
   // check if there are any issues at all
   if ((await getRepoForksCount(repo, token)) == 0) {
     return []

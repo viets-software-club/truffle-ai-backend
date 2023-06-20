@@ -71,6 +71,9 @@ export async function getHistoryPages(
   startPage?: number
 ) {
   const pageCount = await getPageCount(repo, token, historyType)
+  if (pageCount == 0) {
+    return []
+  }
 
   const requestPages: number[] = []
   if (startPage == undefined || startPage == null) {
@@ -104,10 +107,10 @@ export async function getHistoryPages(
  * @param {HistoryType} historyType - what type of history to create
  * "issue" | "star" | "fork"
  * @returns {Promise<number>} A promise that resolves to the total number of pages.
- * @throws {object} Throws an error object if the request fails or the repository has none of the parameter
+ * returns 0 on error
  */
 export async function getPageCount(repo: string, token: string, historyType: HistoryType) {
-  let patchRes: AxiosResponse<StargazersData[] | ForksData[] | IssueData[]>
+  let patchRes: AxiosResponse<StargazersData[] | ForksData[] | IssueData[]> | []
 
   if (historyType === 'star') {
     patchRes = await getRepoPage(repo, token, 'star')
@@ -115,6 +118,10 @@ export async function getPageCount(repo: string, token: string, historyType: His
     patchRes = await getRepoPage(repo, token, 'fork')
   } else {
     patchRes = await getRepoPage(repo, token, 'issue')
+  }
+
+  if (Array.isArray(patchRes)) {
+    return 0
   }
 
   const headerLink: string = (patchRes.headers['link'] as string) || ''
@@ -128,15 +135,12 @@ export async function getPageCount(repo: string, token: string, historyType: His
   }
 
   if (pageCount === 1 && patchRes?.data?.length === 0) {
-    throw {
-      status: patchRes.status,
-      data: []
-    }
+    return 0
   }
   return pageCount
 }
 
-/** This method retrieves the historyType from a page of a GitHub repository
+/** This method retrieves the page of a historyType of a GitHub repository
  * @param {string} repo - Name of the Github repository: "owner/repository"
  * @param {string} token - Github Access token
  * @param {number} page - Page Number to retrieve
@@ -145,7 +149,8 @@ export async function getPageCount(repo: string, token: string, historyType: His
  * only fork history uses 'oldest' | 'newest'
  * @param {HistoryType} historyType - determines which history to create
  * "issue" | "star" | "fork"
- * @returns Promise<Object>: A promise that resolves to the historyType of the repository
+ * @returns Promise<Object>: A promise that resolves to a page of a historyType
+ * empty array on error
  */
 export async function getRepoPage(
   repo: string,
@@ -154,7 +159,7 @@ export async function getRepoPage(
   page?: number,
   direction?: string
 ): Promise<
-  AxiosResponse<ForksData[]> | AxiosResponse<IssueData[]> | AxiosResponse<StargazersData[]>
+  AxiosResponse<ForksData[]> | AxiosResponse<IssueData[]> | AxiosResponse<StargazersData[]> | []
 > {
   let url = ''
   let accept = ''
@@ -184,11 +189,14 @@ export async function getRepoPage(
   if (page !== undefined) {
     url = `${url}&page=${page}`
   }
-
-  return axios.get(url, {
-    headers: {
-      Accept: accept,
-      Authorization: `token ${token}`
-    }
-  })
+  try {
+    return axios.get(url, {
+      headers: {
+        Accept: accept,
+        Authorization: `token ${token}`
+      }
+    })
+  } catch {
+    return []
+  }
 }

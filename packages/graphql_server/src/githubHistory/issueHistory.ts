@@ -10,24 +10,28 @@ const DEFAULT_PER_PAGE = 30
  * @returns Promise<number> : A promise that resolves to the total count of issues for the repository
  */
 async function getRepoIssuesCount(repo: string, token: string): Promise<number> {
-  const response: AxiosResponse<{ open_issues_count: number }> = await axios.get(
-    `https://api.github.com/repos/${repo}`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `token ${token}`
+  try {
+    const response: AxiosResponse<{ open_issues_count: number }> = await axios.get(
+      `https://api.github.com/repos/${repo}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `token ${token}`
+        }
       }
-    }
-  )
+    )
 
-  return response?.data?.open_issues_count
+    return response?.data?.open_issues_count
+  } catch {
+    return 0
+  }
 }
 
 /** Creates the full history of issues for a repository
  * Retrieves the issue records (issue count by date) of a GitHub repository and returns them as an array of `IssuRecord` objects.
  * @param {string} repo - Name of the GitHub repository in the format "owner/repository".
  * @param {string} token - GitHub Access token for authentication
- * @param {number} maxRequestAmount - Maximum number of API requests to make to retrieve the issue records.
+ * @param {number} maxRequestAmount - Range: [2, 100]; Maximum number of API requests to make to retrieve the star records.
  * The higher this value is the more accurate is going to be the graph of the issue history
  * @param {number} startPage - possible startPage for a partialHistory
  * @param {Date} startDate - possible startDate for a partialHistory
@@ -40,6 +44,10 @@ export async function getRepoIssueRecords(
   startPage?: number,
   startDate?: Date
 ): Promise<IssueRecord[]> {
+  // check that maxRequestAmount is a valid value
+  if (maxRequestAmount > 100 || maxRequestAmount < 2) {
+    return []
+  }
   // check if there are any issues at all
   if ((await getRepoIssuesCount(repo, token)) == 0) {
     return []

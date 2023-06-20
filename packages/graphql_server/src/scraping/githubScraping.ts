@@ -8,26 +8,30 @@ import { Developer, DeveloperRepo, timeMode } from '../../types/githubScraping'
  * @returns {string[]} an array that stores alternatingly the owner and the name of each repo: [owner1, repo1, owner2, repo2]
  */
 export async function fetchTrendingRepos(timeMode: timeMode) {
-  const response: AxiosResponse<string> = await axios.get(
-    `https://github.com/trending?since=${timeMode}`
-  )
-  const html = cheerio.load(response.data)
-  const repos: string[] = []
+  try {
+    const response: AxiosResponse<string> = await axios.get(
+      `https://github.com/trending?since=${timeMode}`
+    )
+    const html = cheerio.load(response.data)
+    const repos: string[] = []
 
-  html('h2 a').each((i: number, el: cheerio.Element) => {
-    const repoName = html(el).text().trim()
-    repos.push(repoName)
-  })
+    html('h2 a').each((i: number, el: cheerio.Element) => {
+      const repoName = html(el).text().trim()
+      repos.push(repoName)
+    })
 
-  const trendingSplit: string[] = []
-  // trim the repos to be correctly formatted
-  repos.forEach((repo) => {
-    const trimmedName = repo.replace(/\n\s+/g, '').replace(/\//g, '')
-    const stringSplit = trimmedName.split(' ')
-    trendingSplit.push(stringSplit[0])
-    trendingSplit.push(stringSplit[1])
-  })
-  return trendingSplit
+    const trendingSplit: string[] = []
+    // trim the repos to be correctly formatted
+    repos.forEach((repo) => {
+      const trimmedName = repo.replace(/\n\s+/g, '').replace(/\//g, '')
+      const stringSplit = trimmedName.split(' ')
+      trendingSplit.push(stringSplit[0])
+      trendingSplit.push(stringSplit[1])
+    })
+    return trendingSplit
+  } catch {
+    return []
+  }
 }
 
 /**  This function imports the ReadMe.md file for a repository (if it can be located)
@@ -70,34 +74,38 @@ export async function fetchRepositoryReadme(owner: string, name: string) {
  * @returns   list of {name: 'NAME', username: 'USERNAME', repo: 'REPO'}
  */
 export async function fetchTrendingDevelopers(timeMode: timeMode) {
-  await axios
-    .get('https://github.com/trending/developers?since=' + timeMode)
-    .then((response: { data: string | Buffer }) => {
-      const htmlC = cheerio.load(response.data)
-      const developers: Developer[] = []
-      const developerRepos: DeveloperRepo[] = []
+  try {
+    return await axios
+      .get('https://github.com/trending/developers?since=' + timeMode)
+      .then((response: { data: string | Buffer }) => {
+        const htmlC = cheerio.load(response.data)
+        const developers: Developer[] = []
+        const developerRepos: DeveloperRepo[] = []
 
-      // get the developer names and usernames
-      htmlC('h1.h3.lh-condensed a').each((i: number, el: cheerio.Element) => {
-        const name: string = htmlC(el).text().trim()
-        const username: string = htmlC(el).attr('href')?.substring(1) ?? ''
-        developers.push({ name, username })
-      })
+        // get the developer names and usernames
+        htmlC('h1.h3.lh-condensed a').each((i: number, el: cheerio.Element) => {
+          const name: string = htmlC(el).text().trim()
+          const username: string = htmlC(el).attr('href')?.substring(1) ?? ''
+          developers.push({ name, username })
+        })
 
-      // get the repo name
-      htmlC('h1.h4.lh-condensed a').each((i: number, el: cheerio.Element) => {
-        const repo: string = htmlC(el).attr('href')?.substring(1) ?? ''
-        // check if the repo exists
-        if (repo) {
-          const split = repo.split('/')
-          developerRepos.push({ username: split[0], repo: split[1] })
-        }
-      })
+        // get the repo name
+        htmlC('h1.h4.lh-condensed a').each((i: number, el: cheerio.Element) => {
+          const repo: string = htmlC(el).attr('href')?.substring(1) ?? ''
+          // check if the repo exists
+          if (repo) {
+            const split = repo.split('/')
+            developerRepos.push({ username: split[0], repo: split[1] })
+          }
+        })
 
-      // correctly merge the two arrays
-      return developers.map((developer) => {
-        const matchingRepo = developerRepos.find((repo) => repo.username === developer.username)
-        return { ...developer, ...(matchingRepo || { repo: '' }) }
+        // correctly merge the two arrays
+        return developers.map((developer) => {
+          const matchingRepo = developerRepos.find((repo) => repo.username === developer.username)
+          return { ...developer, ...(matchingRepo || { repo: '' }) }
+        })
       })
-    })
+  } catch {
+    return []
+  }
 }
