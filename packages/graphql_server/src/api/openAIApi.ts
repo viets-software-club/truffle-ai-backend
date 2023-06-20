@@ -11,7 +11,7 @@ const errorMessage =
 //The Header for all requests
 const headers = {
   'Content-Type': 'application/json',
-  Authorization: 'Bearer ' + process.env.OPENAI_API_KEY
+  Authorization: 'Bearer ' + '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' //process.env.OPENAI_API_KEY
 }
 
 /**
@@ -22,7 +22,7 @@ const headers = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getELI5FromReadMe(readMe: string) {
   const questionEli5 = //this is the question send to openAI
-    'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 80 words and do not get too technical'
+    'The following text describes a programming project that is currently in development. Explain to me what the project is trying to achieve without telling me how they are doing so. Please use around 80 words and do not get too technical. If you do not think that the following text is a real readMe just tell me that the provided text is not a readMe'
 
   const requestBodyEli5: RequestBodyOpenAI = {
     model: model,
@@ -64,7 +64,7 @@ async function getHackernewsSentiment(comments: string) {
     comments = comments.substring(0, 5000)
   }
   const questionHackernews = //this is the question send to openAI
-    'The following comments are discussing a new software project. Please get general sentiment regarding the project and use a percentage on whether people like it or not. Please stay around 50 words'
+    'The following comments are discussing a new software project. Please get general sentiment regarding the project and use a percentage on whether people like it or not. Please stay around 50 words. If you can not find any comments or there is just a null just tell me that instead. Only instead'
 
   const requestBodyHackernews: RequestBodyOpenAI = {
     model: model,
