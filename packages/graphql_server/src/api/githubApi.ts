@@ -198,7 +198,7 @@ export async function getRepositoryTopics(
 
 /**
  * returns the amount of contribtuors. Not 100% accurate since the gitHub API does not return certain contributors and on the other hand
- * sometimes shows new contribtuors that can not be seen on the github page.
+ * sometimes shows new contributors that can not be seen on the github page.
  * @param owner
  * @param repo
  * @returns array of strings containing the name of the contributor and the number of commits done by that perso
@@ -222,7 +222,7 @@ export async function getRepositoryTopics(
     )
     // console.log(response.headers)
     const linkHeader: string = response?.headers['link'] as string
-    const lastPageMatch: RegExpMatchArray | null = linkHeader.match(/page=(\d+)>; rel="last"/)
+    const lastPageMatch: RegExpMatchArray | null = linkHeader?.match(/page=(\d+)>; rel="last"/)
     const lastPage: number = lastPageMatch ? parseInt(lastPageMatch[1]) : 1
     return lastPage
   } catch (error) {
