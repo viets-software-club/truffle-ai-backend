@@ -1,0 +1,34 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "license": "MIT",
+  "private": true,
+  "config": {
+    "env_dev": ". ../../env.sh"
+  },
+  "main": "dist/src/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:src": "tsc --project tsconfig.json",
+    "build:tests": "tsc --project tsconfig.test.json",
+    "test:githubApi": "$npm_package_config_env_dev && node dist/test/githubApi.test.js",
+    "test:openAIApi": "$npm_package_config_env_dev && node dist/test/openAIApi.test.js",
+    "test:githubScraper": "$npm_package_config_env_dev && node dist/test/githubScraper.test.js",
+    "test:hackernewsScraper": "$npm_package_config_env_dev && node dist/test/hackernewsScraper.test.js",
+    "test:linkedinScraper": "$npm_package_config_env_dev && node dist/test/linkedinScraper.test.js",
+    "types:supabase": "$npm_package_config_env_dev && npx supabase gen types typescript --project-id \"$SUPABASE_REFERENCE_ID\" > types/supabase.d.ts",
+    "types:codegen": "graphql-codegen --config codegen.ts",
+    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" dist"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.4.1",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "@graphql-codegen/cli": "^4.0.1",
+    "graphql": "^16.6.0",
+    "octokit": "^2.0.22"
+  }
+}
