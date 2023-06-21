@@ -1,0 +1,49 @@
+query GetRepositoryData($owner: String!, $name: String!) {
+  rateLimit {
+    cost
+  }
+  repository(owner: $owner, name: $name) {
+    name
+    owner {
+      id
+      avatarUrl
+      login
+      url
+    }
+    homepageUrl
+    projectsUrl
+    url
+    pullRequests {
+      totalCount
+    }
+    description
+    createdAt
+    languages(first: 100) {
+      edges {
+        node {
+          color
+          name
+        }
+      }
+    }
+    stargazerCount
+    issues {
+      totalCount
+    }
+    forkCount
+    isInOrganization
+  }
+  organization(login: $owner) {
+    login
+    createdAt
+    name
+    avatarUrl
+    repositories {
+      totalCount
+    }
+    email
+    websiteUrl
+    twitterUsername
+    url
+  }
+}

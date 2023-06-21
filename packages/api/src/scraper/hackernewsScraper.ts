@@ -1,84 +1,58 @@
 import axios from 'axios'
 
-/**
- * Search Hacker News stories based on the given name, retrieve comments,
- * and generate an OpenAI request.
- * @param name - The search query to find Hacker News stories.
- * @returns the comments and the links to the posts. please receive in this format: let [comments, links] = searchHackerNewsStories("companyname")
- */
-async function searchHackerNewsStories(name: string) {
-  const url = `http://hn.algolia.com/api/v1/search?query=${name}&tags=story`
-  const allComments: string[] = [] //stores the comments found by getHackernewsCommentsByPostId
-  const linksOfPosts: string[] = []
-  try {
-    const response = await axios.get(url)
-    const formattedJson = response?.data as HackerNewsStoriesResponse
-    const hitslist: HackerNewsStoriesResponseHitsArray = formattedJson.hits
-    for (let i = 0; i < hitslist.length; i++) {
-      const hit: HackerNewsStoriesResponseHit = hitslist[i]
-      const createdAt: string = hit?.created_at
-      const objectId: string = hit?.objectID
-      if (!isMoreThanMonthsTwoAgo(createdAt)) {
-        const comments: string[] | undefined = await getHackerNewsCommentsByPostId(objectId)
-        linksOfPosts.push(`https://news.ycombinator.com/item?id=${objectId}`)
-        if (comments) {
-          for (let j = 0; j < comments.length; j++) {
-            allComments.push(comments[j])
+class HackernewsScraper {
+  static apiUrl = `http://hn.algolia.com/api/v1`
+
+  async fetchHackernewsStoryWithCommentsByText(text: string, maxTimeInMsBack: number) {
+    return Promise.all(
+      (await this.fetchHackernewsStoriesByText(text))
+        .filter((story) => isRecent(story.created_at, maxTimeInMsBack))
+        .map(async (story) => {
+          return {
+            ...story,
+            comments: await this.fetchHackernewsCommentsByStoryId(story.objectID)
           }
-        }
-      }
-    }
+        })
+    )
+  }
 
-    if (allComments.length != 0) {
-      return {
-        comments: allComments,
-        linksToPosts: linksOfPosts
-      }
-    } else {
-      return null
-    }
-  } catch (error) {
-    console.log('Error fetching HTML code:', error)
-    return null
+  /**
+   * Search Hackernews stories based on the given text, retrieve comments,
+   * @param text - search query to find Hackernews stories
+   * @returns the comments and the links to the posts. please receive in this format: let [comments, links] = searchHackerNewsStories("companyname")
+   */
+  async fetchHackernewsStoriesByText(text: string) {
+    const response = await axios.get<HackernewsStoriesResponse>(
+      `${HackernewsScraper.apiUrl}/search?query=${text}&tags=story`
+    )
+    return response.data.hits
+  }
+
+  /**
+   * Retrieve Hacker News comments for a given story ID.
+   * @param story_id - The ID of the story to fetch comments for.
+   * @returns A promise that resolves to an array of comments.
+   */
+  async fetchHackernewsCommentsByStoryId(storyId: string) {
+    const response = await axios.get<HackernewsStoriesResponse>(
+      `${HackernewsScraper.apiUrl}/search?tags=comment,story_${storyId}`
+    )
+    return response.data.hits
   }
 }
 
 /**
- * Retrieve Hacker News comments for a given story ID.
- * @param story_id - The ID of the story to fetch comments for.
- * @returns A promise that resolves to an array of comments.
+ * Check if the given JSON-formatted date is more @param maxTimeInMsBack ago.
+ * @param date
+ * @param maxTimeInMsBack
+ * @returns boolean indicating if the date is more than two months ago.
  */
-async function getHackerNewsCommentsByPostId(story_id: string) {
-  const url = `http://hn.algolia.com/api/v1/search?tags=comment,story_${story_id}`
-  const comments: string[] = [] //an array in which we store all the scraped comments
-
-  try {
-    const response = await axios.get(url)
-    const jsonData: GetHackerNewsCommentsResponseHits =
-      response?.data as GetHackerNewsCommentsResponseHits
-    const data: GetHackerNewsCommentsResponseHitArray = jsonData?.hits
-
-    for (let i = 0; i < data.length; i++) {
-      comments.push(data[i]?.comment_text)
-    }
-
-    return comments
-  } catch (error) {
-    console.log('Error fetching data:', error)
-  }
-}
-
-/**
- * Check if the given JSON-formatted date is more than two months ago.
- * @param jsonDate - The JSON-formatted date string to compare.
- * @returns A boolean indicating if the date is more than two months ago.
- */
-function isMoreThanMonthsTwoAgo(jsonDate: string): boolean {
-  const jsonDateObj = new Date(jsonDate)
+function isRecent(date: string, maxTimeInMsBack: number): boolean {
+  const jsonDateObj = new Date(date)
   const currentDate = new Date()
   const timeDiff = currentDate.getTime() - jsonDateObj.getTime()
-  const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
-  return timeDiff > twoMonthsInMillis
+  // const twoMonthsInMillis = 60 * 24 * 60 * 60 * 1000
+  return timeDiff <= maxTimeInMsBack
 }
 
-export { searchHackerNewsStories }
+export default HackernewsScraper

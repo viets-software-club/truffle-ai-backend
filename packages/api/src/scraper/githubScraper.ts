@@ -2,103 +2,94 @@ import axios, { AxiosResponse } from 'axios'
 import * as cheerio from 'cheerio'
 import * as showdown from 'showdown'
 
-/** Get all the information from the GitHub trending page; all the repos and the names of their creators
- * @param {string} timeMode shoud be 'daily', 'weekly' or 'monthly' => timescope of the trending page
- * @returns {string[]} an array that stores alternatingly the owner and the name of each repo: [owner1, repo1, owner2, repo2]
- */
-export async function fetchTrendingRepos(timeMode: timeMode) {
-  const response: AxiosResponse<string> = await axios.get(
-    `https://github.com/trending?since=${timeMode}`
-  )
-  const html = cheerio.load(response.data)
-  const repos: string[] = []
+type GithubTrendingTimePeriod = 'weekly' | 'daily' | 'monthly'
 
-  html('h2 a').each((i: number, el: cheerio.Element) => {
-    const repoName = html(el).text().trim()
-    repos.push(repoName)
-  })
-
-  const trendingSplit: string[] = []
-  // trim the repos to be correctly formatted
-  repos.forEach((repo) => {
-    const trimmedName = repo.replace(/\n\s+/g, '').replace(/\//g, '')
-    const stringSplit = trimmedName.split(' ')
-    trendingSplit.push(stringSplit[0])
-    trendingSplit.push(stringSplit[1])
-  })
-  return trendingSplit
-}
-
-/**  This function imports the ReadMe.md file for a repository (if it can be located)
- * @param {string} owner - owner of the repo
- * @param {string} name - name of the repo
- * @returns {string} a string containing the text of the repo. Throws an error if file can't be located
- * @todo paths in the beginning can be constantly adapted if new ReadMe file locations are being found
- */
-async function fetchRepositoryReadme(owner: string, name: string) {
-  // these paths exists to check in multiple locations for the readme files
-  const readmePaths: string[] = [
-    `https://raw.githubusercontent.com/${owner}/${name}/release/readme.md`,
-    `https://raw.githubusercontent.com/${owner}/${name}/dev/README.rst`,
-    `https://raw.githubusercontent.com/${owner}/${name}/main/README.md`,
-    `https://raw.githubusercontent.com/${owner}/${name}/master/README.md`
-  ]
-
-  for (let i = 0; i < readmePaths.length; i++) {
-    try {
-      const response: AxiosResponse<string> = await axios.get(readmePaths[i])
-      const converter = new showdown.Converter()
-
-      // Use the converter object to convert Markdown to HTML to String:
-      const html: string = converter.makeHtml(response.data).toString()
-      return html
-        .replace(/<[^>]*>/g, '')
+class GithubScraper {
+  static showdownConverter = new showdown.Converter()
+  /**
+   * Get repositories from GitHub's trending page
+   * @param timePeriod
+   * @returns object consisting of repository owner and name
+   */
+  async fetchTrendingRepositories(timePeriod: GithubTrendingTimePeriod) {
+    const response: AxiosResponse<string> = await axios.get(
+      `https://github.com/trending?since=${timePeriod}`
+    )
+    const $ = cheerio.load(response.data)
+    const repositoryNamesArr = $('h2 a')
+      .map((_, el) => $(el).text().trim())
+      .toArray()
+    return repositoryNamesArr.map((repository: string) => {
+      // remove / and \n\s+ if present in trending repository <a> tag and split at space into name and owner
+      const [repositoryName, repositoryOwner] = repository
         .replace(/\n\s+/g, '')
         .replace(/\//g, '')
-    } catch (error) {
-      // ignore error and try other read me file path
-      continue
-    }
+        .split(' ')
+      return {
+        repositoryName,
+        repositoryOwner
+      }
+    })
   }
-  console.log("ReadMe couldn't be found")
-  return ' '
-}
 
-/** Get trending developers (and their trending repos) from the github page
- * @param {string} timeMode describes the timeframe; 'daily' | 'weekly' | 'monthly'
- * @returns   list of {name: 'NAME', username: 'USERNAME', repo: 'REPO'}
- */
-async function fetchTrendingDevelopers(timeMode: timeMode) {
-  await axios
-    .get(`https://github.com/trending/developers?since=${timeMode}`)
-    .then((response: { data: string | Buffer }) => {
-      const htmlC = cheerio.load(response.data)
-      const developers: Developer[] = []
-      const developerRepos: DeveloperRepo[] = []
+  /**
+   * Reads possible readme files of a repository on Github
+   * @param repositoryOwner owner of the repo
+   * @param repositoryName name of the repo
+   * @returns first found readme file
+   */
+  fetchRepositoryReadme(repositoryOwner: string, repositoryName: string) {
+    // possible locations for readme's
+    const readmeUrls = [
+      `https://raw.githubusercontent.com/${repositoryOwner}/${repositoryName}/release/readme.md`,
+      `https://raw.githubusercontent.com/${repositoryOwner}/${repositoryName}/dev/README.rst`,
+      `https://raw.githubusercontent.com/${repositoryOwner}/${repositoryName}/main/README.md`,
+      `https://raw.githubusercontent.com/${repositoryOwner}/${repositoryName}/master/README.md`
+    ]
 
-      // get the developer names and usernames
-      htmlC('h1.h3.lh-condensed a').each((i: number, el: cheerio.Element) => {
-        const name: string = htmlC(el).text().trim()
-        const username: string = htmlC(el).attr('href')?.substring(1) ?? ''
-        developers.push({ name, username })
-      })
+    return Promise.all(
+      readmeUrls
+        .map(async (readmeUrl) => {
+          try {
+            const response = await axios.get<string>(readmeUrl)
+            return GithubScraper.showdownConverter
+              .makeHtml(response.data)
+              .replace(/<[^>]*>/g, '')
+              .replace(/\n\s+/g, '')
+              .replace(/\//g, '')
+          } catch (error) {
+            // ignore error and try other readme url
+            return null
+          }
+        })
+        .filter((val) => val != null)
+    ) as Promise<string[]>
+  }
 
-      // get the repo name
-      htmlC('h1.h4.lh-condensed a').each((i: number, el: cheerio.Element) => {
-        const repo: string = htmlC(el).attr('href')?.substring(1) ?? ''
-        // check if the repo exists
-        if (repo) {
-          const split = repo.split('/')
-          developerRepos.push({ username: split[0], repo: split[1] })
+  /**
+   * Get developers from Github's trending developers page
+   * @param timePeriod
+   * @returns developers by username, normal name and repository
+   */
+  async fetchTrendingDevelopers(timePeriod: GithubTrendingTimePeriod) {
+    const response = await axios.get<string>(
+      `https://github.com/trending/developers?since=${timePeriod}`
+    )
+    const $ = cheerio.load(response.data)
+
+    return $('article')
+      .map((i, el) => {
+        const $developerLink = $(el).find('h1.h3.lh-condensed a')
+        const $repoLink = $(el).find('h1.h4.lh-condensed a')
+        const repoHref = $repoLink.attr('href') as string
+        return {
+          name: $developerLink.text().trim(),
+          username: ($developerLink.attr('href') as string).substring(1),
+          repository: repoHref.substring(repoHref.lastIndexOf('/'))
         }
       })
-
-      // correctly merge the two arrays
-      return developers.map((developer) => {
-        const matchingRepo = developerRepos.find((repo) => repo.username === developer.username)
-        return { ...developer, ...(matchingRepo || { repo: '' }) }
-      })
-    })
+      .toArray()
+  }
 }
 
-export { fetchRepositoryReadme, fetchTrendingDevelopers }
+export default GithubScraper
