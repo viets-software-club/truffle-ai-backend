@@ -1,27 +1,36 @@
-import { exposeProjectsData } from './resolver/projects'
-import { createProject } from '../dbUpdater'
-// import { parseGitHubUrl } from '../utils'
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+// @ts
+
+import { MercuriusContext } from 'mercurius'
+import { throwErrorWithCode } from '../util/util'
+import DBUpdater from 'api'
+
+type AddBookmarkArgs = {
+  repositoryOwner: string
+  repositoryName: string
+}
+
+const dbUpdater = new DBUpdater({
+  scrapingBotApiKey: process.env.SCRAPING_BOT_API_KEY,
+  scrapingBotUsername: process.env.SCRAPING_BOT_USER_NAME,
+  openAiApikey: process.env.OPENAI_API_KEY,
+  githubToken: process.env.GITHUB_API_TOKEN
+})
 
 const resolvers = {
   Query: {
-    helloWorld: () => 'Hello world!',
-    allProjects: async () => {
-      return await exposeProjectsData()
-    }
+    helloWorld: () => 'Hello world!'
   },
   Mutation: {
-    // takes in variables. Parent object _ is never used
-    addProjectByName: async (_: unknown, { name, owner }: { name: string; owner: string }) => {
-      return await createProject(name, owner, null)
-    },
-    // takes in variables. Parent object _ is never used
-    addProjectByUrl: async (_: unknown, { url }: { url: string }) => {
-      // const urlParts = parseGitHubUrl(url)
-      // if (urlParts === null) {
-      //   return false
-      // } else {
-      //   return await createProject(urlParts.repo, urlParts.owner, null)
-      // }
+    addBookmark: async (
+      _parent: unknown,
+      { repositoryOwner, repositoryName }: AddBookmarkArgs,
+      context: MercuriusContext
+    ) => {
+      if (!context.user) {
+        return throwErrorWithCode('BAD', 'Bad')
+      }
+      await dbUpdater.addBookmark(repositoryOwner, repositoryName, context.user.id)
     }
   }
 }
