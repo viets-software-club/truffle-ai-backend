@@ -10,6 +10,7 @@ import {
   ProjectUpdate,
   ProjectInfo
 } from '../types/supabaseUtils'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PostgrestError } from '@supabase/supabase-js'
 
 /*

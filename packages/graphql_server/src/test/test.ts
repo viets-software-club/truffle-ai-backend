@@ -71,6 +71,7 @@ export async function main(timeMode: timeMode, firstNRepos: number) {
     }
     console.log(owner)
     console.log(name)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const categories = await github.getRepositoryTopics(owner, name, authToken)
     //Categorizes the project
     console.log('Categories:\n')

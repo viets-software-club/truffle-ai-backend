@@ -1,4 +1,5 @@
 import Fastify, { FastifyReply, FastifyRequest } from 'fastify'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import mercurius, { MercuriusContext } from 'mercurius'
 import resolvers from './graphql/resolvers'
 import schema from './graphql/schema'
