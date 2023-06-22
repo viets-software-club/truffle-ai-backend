@@ -44,10 +44,12 @@ export async function getRepoIssueRecords(
   startPage?: number,
   startDate?: Date
 ): Promise<IssueRecord[]> {
+
   // check that maxRequestAmount is a valid value
   if (maxRequestAmount > 100 || maxRequestAmount < 2) {
     return []
   }
+
   // check if there are any issues at all
   if ((await getRepoIssuesCount(repo, token)) == 0) {
     return []
