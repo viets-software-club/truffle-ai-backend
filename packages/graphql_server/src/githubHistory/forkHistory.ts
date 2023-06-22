@@ -10,7 +10,7 @@ const DEFAULT_PER_PAGE = 30
  * @returns Promise<number> : A promise that resolves to the total count of forks for the repository
  */
 async function getRepoForksCount(repo: string, token: string): Promise<number> {
-  try { 
+  try {
     const response: AxiosResponse<{ forks_count: number }> = await axios.get(
       `https://api.github.com/repos/${repo}`,
       {
@@ -44,12 +44,11 @@ export async function getRepoForkRecords(
   startPage?: number,
   startDate?: Date
 ): Promise<ForkRecord[]> {
-
   // check that maxRequestAmount is a valid value
   if (maxRequestAmount > 100 || maxRequestAmount < 2) {
     return []
   }
-  
+
   // check if there are any issues at all
   if ((await getRepoForksCount(repo, token)) == 0) {
     return []
