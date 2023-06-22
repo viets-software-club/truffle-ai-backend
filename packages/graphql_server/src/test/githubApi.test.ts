@@ -70,10 +70,6 @@ export async function testGetContributorCount(githubToken: string) {
   console.log('Expected:', 20)
   console.log('Actual:', await getContributorCount('microsoft', 'AI-For-Beginners', githubToken))
 
-  //console.log('Case: Zero contributors')
-  //console.log('Expected:', 0)
-  //console.log('Actual:', await getContributorCount('acreturus', 'HackathonGitHub', githubToken))
-
   console.log('Case: 7 contributors')
   console.log('Expected:', 7)
   console.log('Actual:', await getContributorCount('Zeqiang-Lai', 'DragGAN', githubToken))
@@ -120,5 +116,4 @@ export async function testGetContributorCount(githubToken: string) {
   console.log('Actual:', await getContributorCount('datawrangling', 'trendingtopics', githubToken))
 }
 
-//void testGetRepositoryTopics('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')
 void testGetContributorCount('token')
