@@ -1,4 +1,4 @@
-import { getRepositoryTopics } from '../api/githubApi'
+import { read } from 'fs'
 import {
   getCategoryFromGPT,
   getELI5FromReadMe,
@@ -72,15 +72,6 @@ IPv6源去掉了两个失效的频道。`
   console.log(await getELI5FromReadMe(readMechinese))
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function testHackerNewsSentiment() {
-  //get real comments from method in hackerNewsScraper. E.g. searchHackerNewsStories('SuperAGI')
-
-  const comments =
-    '&gt; What do you think?<p>Universal basic incoom. This is what I argue in my post on AI&#x27;s impact on programming jobs -- my take is that if AI ends up automating low end tasks, then it opens up opportunities for us to spend our time on more creative and challenging problems. The current generation of models know all the data structures and algorithms but do they have the ability to extrapolate their knowledge to come up with novel solutions to unseen problems -- which is what we are good at. Similarly, there are tons of interesting problems which are unsolved in other domains and we could use AI&#x27;s help to tackle those. Naval Ravikant talks about something similar on Joe Rogan Podcast -- where he says everybody can be rich. His argument was that if every human on the planet could become an engineer, or doctor, or scientist, we would solve all of our basic problems in few years and then humanity would be free to explore creative things. So if AI gets us there, we could be writers, actors, scientists.<p><a href='
-  console.log(await getHackernewsSentiment(comments))
-}
-
 //das ganze ding ist noch bisschen unpredictable
 export async function testGetHackernewsSentiment() {
   // Test for an empty call
@@ -127,6 +118,45 @@ export async function testGetHackernewsSentiment() {
   )
 }
 
+export async function testGetCategoryFromGPT() {
+  // Test with wrong Categories
+  const readMe = `
+    SuperAGI logo, Open-source framework to build, manage and run useful Autonomous AI Agents. SuperAGI forks SuperAGI stars SuperAGI pull-requests SuperAGI Commits. Follow SuperAGI. Follow _superAGI Join SuperAGI Discord Community. Share SuperAGI Repository. Follow _superAGI Share on Telegram Share on Reddit Buy Me A Coffee. bulb Features Provision, Spawn & Deploy Autonomous AI Agents. Extend Agent Capabilities with Tools. Run Concurrent Agents Seamlessly. Graphical User Interface. Action Console. Multiple Vector DBs. Multi-Modal Agents. Agent Trajectory Fine-Tuning. Performance Telemetry. Optimized Token Usage. Agent Memory Storage. Looping Detection Heuristics. Concurrent Agents. Resource Manager. hammer_and_wrench Tools Slack Email Jira File Manager Google Search Dall-E Github Web Interaction Zapier Instagram Trello Google Analytics Duckduckgo Discord. computer Screenshots GUI. SuperAGI logo. motorway Roadmap Click here to checkout the latest roadmap link. gear Setting up Download the repo using git clone https://github.com/TransformerOptimus/SuperAGI.git in your terminal or directly from github page in zip format. Navigate to the directory using cd SuperAGI and create a copy of config_template.yaml and name it config.yaml. Enter your unique OpenAI API Key, Google key, Custom search engine ID without any quotes or spaces in config.yaml file. Follow the links below to get your keys: Keys Accessing the keys OpenAI API Key Sign up and create an API key at OpenAI Developer Google API key Create a project in the Google Cloud Console and enable the API you need (for example: Google Custom Search JSON API). Then, create an API key in the "Credentials" section. Custom search engine ID Visit Google Programmable Search Engine to create a custom search engine for your application and obtain the search engine ID. Ensure that Docker is installed in your system, if not, Install it from here. Once you have Docker Desktop running, run command : docker-compose up --build in SuperAGI directory. Open your browser and go to localhost:3000 to see SuperAGI running. warning Under Development! This project is under active development and may still have issues. We appreciate your understanding and patience. If you encounter any problems, please first check the open issues. If your issue is not listed, kindly create a new issue detailing the error or problem you experienced. Thank you for your support! film_projector Curated Videos How To Install SuperAGI on: Github Codespaces Windows/MacOS/Linux woman_technologist Contributors TransformerOptimus Cptsnowcrasher vectorcrow Akki-jain Autocop-AgentCOLONAYUSHluciferlinx101mukundans89Fluder-ParadynenborthynihirrTarraann starStar History Star History Chart
+    `
+  console.log('\nTest with wrong categories and valid readMe: Should return correct categories\n')
+  console.log(await getCategoryFromGPT(['fdsf', 'fjdsif'], readMe))
+
+  //Test mit wrong categories and null
+  console.log('\nTest mit wrong categories and null: should return Miscellaneous\n')
+  console.log(await getCategoryFromGPT(['fdsf', 'fjdsif'], null))
+  // Test with empty readMe
+  console.log('\nTest with empty readMe: should return an empty array\n')
+  console.log(await getCategoryFromGPT(null, ' '))
+
+  // Test with null for both parameters
+  console.log('\nTest with null for both parameters: Should return CategorizationError\n')
+  console.log(await getCategoryFromGPT(null, null))
+
+  // Test with null for topcs
+  console.log('\nTest with null as topics: Should return categories\n')
+  console.log(await getCategoryFromGPT(null, readMe))
+
+  // Test with null as description
+  console.log('\nTest with null as readMe: Should return Categories \n')
+  console.log(await getCategoryFromGPT(['nextjs', 'openai', 'notion', 'ai-sdk', 'tiptap'], null))
+
+  const readMeGerman = `
+    SuperAGI-Logo, Open-Source-Framework zum Erstellen, Verwalten und Ausführen nützlicher autonomer KI-Agenten. SuperAGI forkt SuperAGI Sterne SuperAGI Pull-Anfragen SuperAGI Commits. Folge SuperAGI. Folge _superAGI Tritt der SuperAGI-Discord-Community bei. Teile das SuperAGI-Repository. Folge _superAGI Teilen auf Telegram Teilen auf Reddit Kauf mir einen Kaffee. 💡 Funktionen Bereitstellen, Erzeugen und Bereitstellen autonomer KI-Agenten. Erweitern der Agentenfähigkeiten mit Tools. Nahtlose Ausführung von Agenten parallel. Grafische Benutzeroberfläche. Aktionskonsole. Mehrere Vektor-Datenbanken. Multi-Modale Agenten. Feinabstimmung der Agenten-Trajektorie. Leistungs-Telemetrie. Optimierter Token-Verbrauch. Agentenspeicher. Heuristik zur Erkennung von Schleifen. Gleichzeitige Agenten. Ressourcenmanager. 🔨 Tools Slack E-Mail Jira Dateimanager Google-Suche Dall-E Github Web-Interaktion Zapier Instagram Trello Google Analytics Duckduckgo Discord. 💻 Screenshots GUI. SuperAGI-Logo. 🛣️ Roadmap Klicken Sie hier, um den neuesten Roadmap-Link zu überprüfen. ⚙️ Einrichten Laden Sie das Repository mit git clone https://github.com/TransformerOptimus/SuperAGI.git in Ihrem Terminal oder direkt von der Github-Seite im Zip-Format herunter. Navigieren Sie mit cd SuperAGI in das Verzeichnis und erstellen Sie eine Kopie von config_template.yaml mit dem Namen config.yaml. Geben Sie Ihren eindeutigen OpenAI API-Schlüssel, Ihren Google-Schlüssel und Ihre benutzerdefinierte Suchmaschinen-ID ohne Anführungszeichen oder Leerzeichen in der Datei config.yaml ein. Folgen Sie den Links unten, um Ihre Schlüssel zu erhalten: Schlüsselzugriff Die Schlüssel erhalten OpenAI API-Schlüssel Melden Sie sich an und erstellen Sie einen API-Schlüssel unter OpenAI Developer Google API-Schlüssel Erstellen Sie ein Projekt in der Google Cloud Console und aktivieren Sie die benötigte API (z. B. Google Custom Search JSON API). Erstellen Sie dann einen API-Schlüssel im Abschnitt "Anmeldedaten". Benutzerdefinierte Suchmaschinen-ID Besuchen Sie Google Programmable Search Engine, um eine benutzerdefinierte Suchmaschine für Ihre Anwendung zu erstellen und die Suchmaschinen-ID zu erhalten. Stellen Sie sicher, dass Docker in Ihrem System installiert ist. Wenn nicht, installieren Sie es von hier aus. Sobald Sie Docker Desktop ausgeführt haben, führen Sie den Befehl docker-compose up --build im SuperAGI-Verzeichnis aus. Öffnen Sie Ihren Browser und gehen Sie zu localhost:3000, um SuperAGI in Aktion zu sehen. ⚠️ In Entwicklung! Dieses Projekt befindet sich in aktiver Entwicklung und kann noch Probleme aufweisen. Wir danken Ihnen für Ihr Verständnis und Ihre Geduld. Wenn Sie auf Probleme stoßen, überprüfen Sie bitte zuerst die offenen Issues. Wenn Ihr Problem nicht aufgeführt ist, erstellen Sie bitte ein neues Issue und beschreiben Sie den Fehler oder das Problem, das Sie erlebt haben. Vielen Dank für Ihre Unterstützung! 📽️ Kuratierte Videos So installieren Sie SuperAGI auf: Github Codespaces Windows/MacOS/Linux 👩‍💻 Mitwirkende TransformerOptimus Cptsnowcrasher vectorcrow Akki-jain Autocop-AgentCOLONAYUSHluciferlinx101mukundans89Fluder-ParadynenborthynihirrTarraann ⭐ Star-Verlauf Star-Verlaufsdiagramm
+`
+
+  // Test with German readMe
+  console.log('\nTest with german readMe: returns Categories\n')
+  console.log(await getCategoryFromGPT(null, readMeGerman))
+
+  // Test with valid parameters
+  console.log('\nTest with valid parameters: returns Categories\n')
+  console.log(await getCategoryFromGPT(['nextjs', 'openai', 'notion', 'ai-sdk', 'tiptap'], readMe))
+}
 //void testCategorization('next.js', 'vercel')
 //void testgetEli5FromReadMe()
-void testGetHackernewsSentiment()
+void testGetCategoryFromGPT()

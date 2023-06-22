@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { all } from 'axios'
 
 import {
   HackerNewsStoriesResponse,
@@ -8,7 +8,7 @@ import {
   GetHackerNewsCommentsResponseHitArray
 } from '../../types/hackerNewsScraping'
 
-export { searchHackerNewsStories }
+export { searchHackerNewsStories, getHackerNewsCommentsByPostId }
 
 /**
  * Search Hacker News stories based on the given name, retrieve comments,
@@ -49,7 +49,10 @@ async function searchHackerNewsStories(name: string) {
       return null
     }
   } catch (error) {
-    console.log('Error fetching HTML code:', error)
+    console.log(
+      'Error fetching HTML code: maybe the name of the repo contains random symbols',
+      error
+    )
     return null
   }
 }
