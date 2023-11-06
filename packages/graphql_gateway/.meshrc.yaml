@@ -8,11 +8,11 @@ sources:
       graphql:
         endpoint: '{env.SUPABASE_GRAPHQL_URL}'
         operationHeaders:
-          apiKey: '{env.SUPABASE_API_KEY}'
+          apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpcG5oa21rbG1idXhqd3pwaXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkyOTcwODgsImV4cCI6MjAxNDg3MzA4OH0.KuyYduvuwEKEr2Pkb6kbupS4NFo577ch2laXucKllrk'
           Content-Type: application/json
           Authorization: '{context.headers["authorization"]}'
         schemaHeaders:
-          apiKey: '{env.SUPABASE_API_KEY}'
+          apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpcG5oa21rbG1idXhqd3pwaXBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkyOTcwODgsImV4cCI6MjAxNDg3MzA4OH0.KuyYduvuwEKEr2Pkb6kbupS4NFo577ch2laXucKllrk'
           Content-Type: application/json
           Authorization: '{context.headers["authorization"]}'
   - name: Server
