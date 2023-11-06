@@ -1,7 +1,7 @@
 import { ResolveUserFn, useGenericAuth } from '@envelop/generic-auth'
 import { createClient } from '@supabase/supabase-js'
 import { IncomingMessage } from 'http'
-console.log(process.env.SUPABASE_API_KEY);
+console.log("api key", process.env.SUPABASE_API_KEY);
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY, {
   auth: {
     autoRefreshToken: false,
