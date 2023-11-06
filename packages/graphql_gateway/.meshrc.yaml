@@ -24,7 +24,4 @@ sources:
           Authorization: '{context.headers["authorization"]}'
         schemaHeaders:
           Authorization: '{context.headers["authorization"]}'
-plugins:
-  - httpDetailsExtensions:
-        if: "0 == 0"
 additionalEnvelopPlugins: './src/envelopPlugins'
