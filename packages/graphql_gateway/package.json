@@ -8,9 +8,9 @@
     "env_dev": ". ../../env.sh"
   },
   "scripts": {
-    "dev": "$npm_package_config_env_dev && mesh dev",
-    "build": "$npm_package_config_env_dev && mesh build",
-    "serve": "$npm_package_config_env_dev && mesh start"
+    "dev": "DEBUG=1 $npm_package_config_env_dev && mesh dev",
+    "build": "DEBUG=1 $npm_package_config_env_dev && mesh build",
+    "serve": "DEBUG=1 $npm_package_config_env_dev && mesh start"
   },
   "dependencies": {
     "@envelop/core": "^3.0.6",
