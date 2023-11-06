@@ -51,6 +51,7 @@ COPY env.sh env.sh
 ## copy build with 'graphql_server's schema from 'build' stage
 COPY --from=build /app/packages/graphql_gateway/ /app/packages/graphql_gateway/
 COPY --from=build /app/packages/graphql_server/src/graphql/schema.ts /app/packages/graphql_server/src/graphql/schema.ts
+RUN apk --no-cache add curl
 ## install production dependencies
 RUN npm ci --omit=dev -w graphql_gateway
 ## serve
